@@ -38,3 +38,43 @@ For the time being, I'm going to start this project fresh in this git repo. As
 it develops enough to stand on its own feet, I'll move it into its own repo.
 
 ### R1D1 - 2020-07-27
+
+Okay, I may have mistimed this, but I did two blocks of coding (did some mental
+loading earlier which helped) on this project. The public end of things helps!
+Feels good to get a like on Twitter from an undergrad friend. 
+
+So here's what I've got (essentially): I'm building out agent level functions to
+generate and evaluate trades, engage in production, and calculate utility. It's
+not fully functional, but there's actually a decent bit of the core logic in
+there. It helps that I've been picking at this problem in an unsystematic way
+for the last few weeks.
+
+Two ways I want it to be different: 
+
+First, I want agents to look at several options and I want them to adapt the
+parameters of those options based on experience.
+
+Second, I want a network structure that isn't just a random network. I'm
+picturing a possibility where some agents specialize in going to various
+markets, or where agents do a sort of El Farol type thing where they decide
+when/if/how often to go to market. 
+
+In any case, I want the model to allow for certain possibilities, and I'd like
+to know something about the probability distribution of those possiblities
+emerging. Specifically agents that specialize in trade rather than production. 
+
+I also had a thought about the possibility of time preferences. Currently I'm
+modeling exchanges as a vector of positive and negative numbers. If there was
+also a vector of positive integers, it could allow parts of a trade to happen at
+different times. There will need to be some sort of punishing factor (maybe a
+hit to reputational points) to prevent agents from just writing bad checks. But
+it could also allow the agents to create financial markets.
+
+Maybe they should evaluate the probability of a trade going through along with
+the utility effect that the trade would actually have.
+
+Agents might learn functions to map observables about their trading partner, and
+the features of the trade to a probability estimate. I would expect rules to
+emerge like "if it's too good to be true..."
+
+In any case, I've got lots of ideas to plug in... tomorrow.
