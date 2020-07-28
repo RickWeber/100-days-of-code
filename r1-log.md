@@ -78,3 +78,23 @@ the features of the trade to a probability estimate. I would expect rules to
 emerge like "if it's too good to be true..."
 
 In any case, I've got lots of ideas to plug in... tomorrow.
+
+### R1D2 - 2020-07-28
+
+Okay, Tuesday, day Tue. 
+
+Learning about classes to see if I can represent a contract with its own type of object
+Come to think of it, I think I'd better stop the timer and do some reading. This
+is educational, but I'm not going to count it against my coding time.
+
+Okay, I think I'm getting my contract ("trade") class sorted out.
+
+It's still a bit of a mess. Lots of stuff... too much to properly see it all at
+once. Need to sort it all out. Why am I not doing this in org mode? Or is there
+some other way to fold code in emacs?
+
+In any case, I struggled to keep myself moving. Not really sure why. Just a
+pushing against the resistance sort of day, I guess. I've made my hour, but I'm
+going to go back in and at least lay out a map of what I've got and what gaps I
+need to fill...
+
