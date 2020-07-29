@@ -98,3 +98,81 @@ pushing against the resistance sort of day, I guess. I've made my hour, but I'm
 going to go back in and at least lay out a map of what I've got and what gaps I
 need to fill...
 
+
+### R1D3 - 2020-07-29
+
+Thought from last night: I've got agents' plans and capacities coded as vectors.
+I can compare two agents by looking at their cosine similarity...
+
+Thought from this morning: I should have some sort of tests built in to my code
+to make sure it's doing everything correctly. But I still don't have any real
+experience with systematic testing... I should read up on that.
+
+Okay, I'm definitely feeling good about the production method. But that's the
+easy part. I did figure out folding code in spacemacs which is going to make
+life easier... zc zo. But there's still a lot of stuff that I need to straighten
+out.
+
+I'm nearly at 200 lines, but a lot of it is comments. Let's lay out a plan..
+
+I need the model and agent classes. I think I also want a contract class.
+Agents *should* be able to replicate in a way that allows the population to
+adapt. Part of me wonders if I want another class to hold all the agents'
+parameters. Then I could create some mutation methods in that class, and allow
+parent agents to create new agents with mutated copies of their own parameters.
+
+I should also take the chance to go through the methods and rename things. 
+
+Here's what I've got right now:
+
+- Agent Class
+  + init
+  + step
+  + produce
+  + findpartner
+  + move
+  + rand_trade
+  + eval_trade
+  + make_trade
+  + utility
+  + learn
+
+- Market Class
+  + init
+  + step
+
+- Contract Class
+  + init
+  + step
+  + reverse
+  + acceptable
+  
+So, let's sort this out. Hell, I can delete everything and it should be fine
+since I've got a git commit!
+
+So here's what I really want:
+
+Agent:
+- produce,
+- find a partner (either locally, or in an explicit network)
+- move and/or update network connections
+- propose a trade (a random trade and/or based on costs/benefits and/or
+  parameters that update with experience)
+- check current utility
+- evaluate a prospective trade relative to not taking that trade (this might
+  just be a probability of accepting a good trade, perhaps based on current
+  endowment or other things)
+- update parameters that bias behaviors
+
+A step of the model should involve agents producing, looking for possible
+trades, possibly making an exchange, and updating expectations about prices
+(perhaps prices in particular locations)
+  
+I think my current idea of a contract is pretty okay: two agents, quantities to
+be exchanged, and the timing of those exchanges.
+
+I made a new scratch file to hold all the code I'm junking, plus the notes
+I left myself as comments. I've started cleaning up the code I actually want in
+the model.py file. I've left more holes than when I started, but it's also a bit
+cleaner. I've got my hour in, but now I've got to get back to work on other stuff...
+

@@ -1,3 +1,4 @@
+# libraries
 import numpy as np
 from mesa import Agent, Model
 from mesa.time import RandomActivation
@@ -6,80 +7,50 @@ from mesa.space import MultiGrid
 
 
 class BarterAgent(Agent):
-    """An agent with ability to produce and trade."""
     def __init__(self, unique_id, model):
+        # plan, ppf, util_params, endowment,
+        # discount_rate, learning_rate, trade_params):
         super().__init__(unique_id, model)
         self.model = model
         self.plan = np.ones(model.num_goods)
         self.ppf = np.random.randint(4, size=(model.num_goods))
         self.util_params = np.ones(model.num_goods) / model.num_goods
         self.endowment = np.zeros(model.num_goods)
-        self.discount_rate = 0.05
+        self.discount_rate = np.random.uniform(0.01, 0.25)
         self.learning_rate = 0.05
         self.trade_params = np.zeros(model.num_goods)
-        # self.bias = np.ones(model.num_goods) # the idea here is to
-        # over/understate willingness to buy/sell, possibly based on
-        # observations about one's trading partner. But what I really
-        # want is a bag of bias vectors and some mapping function.
-        # but that sounds too complicated for right now.
 
     def step(self):
+        self.move()
         self.produce()
-        # possibly move, or otherwise choose not to trade
-        # self.move()
-        # randomly select a trading partner
-        partner = self.model.random.choice(self.model.schedule.agents)
-        # in the future this should be a weighted probability based on
-        # experience and signals sent by other agents.
-        # Make up a random trade
-        deal = self.rand_trade(partner)  # creates Trade() object
-        # if proposed trade is unacceptable...
-        if not deal.acceptable():
-            # set values so the trade doesn't happen and it isn't marked as complete
-            deal.times = - np.ones(self.model.num_goods)
-        if self.propose_trade(partner, deal):
-            # actually make the trade
-            self.trade(partner, deal)
-            # and update the agents
-            self.learn(deal)
-            partner.learn(deal)
+        self.trade()
+
+    def move(self):
+        possible_steps = self.model.grid.get_neighborhood(
+            self.pos,
+            moore=True,
+            include_center=True
+        )
+        # I could add some bias or a simple program to change how they move...
+        new_position = self.random.choice(possible_steps)
+        self.model.grid.move_agent(self, new_position)
 
     def produce(self):
-        production = (self.plan * self.ppf) / sum(self.plan)
+        production = np.dot(self.plan, self.ppf) / sum(self.plan)
         self.endowment = self.endowment + production
 
-        # right now it's just a blanket offer
-    # def __init__(self, A1, A2, quantities, model):
-    def rand_trade(self, partner):
-        quantities = np.random.normal(size=(self.model.num_goods))
-        time = np.zeros(self.model.num_goods)
-        deal = Trade(self, partner, quantities, times)
-        return deal
-
-    # def propose_trade(self, partner, deal):
-    #     # deal = self.rand_trade + self.trade_params
-    #     self.eval_trade(deal) and partner.eval_trade(-deal)
-
-    def eval_trade(self, deal):
-        # Do I benefit from the trade
-        d1 = deal
-        d2 = deal.reverse
-        u1 = self.utility
-        self.make_trade(d1)
-        u2 = self.utility()
-        self.make_trade(d2)
-        u1 < u2
-        # self.utility() < self.make_trade(deal).utility()
-        # this should really be a forecast of utility if a) I don't make
-        # the trade, and b) I've got those resources on hand to possibly
-        # make the next trade...
-        # Can I make the trade?
-
-    def make_trade(self, deal):
-        self.endowment
-    # def make_trade(self, deal):
-    #     self.endowment = self.endowment + deal
-    # I think I've actually got this in the step function of the deal itself
+    def trade(self):
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])
+        if len(cellmates) < 1:
+            return
+        partner = self.random.choice(cellmates)
+        # deal = Contract(self, partner).random_trade()
+        deal = Contract(self, partner).null_trade(1/10)
+        if not self.evaluate_trade(deal):
+            return
+        if not partner.evaluate_trade(deal.reverse):
+            return
+        self.make_trade(deal)
 
     def utility(self):
         utils = 0
@@ -87,47 +58,34 @@ class BarterAgent(Agent):
             utils += self.endowment[i] ** self.util_params[i]
         return utils  # I can make this nicer later.
 
-    def trade(self, partner, deal):
-        self.make_trade(deal)
-        partner.make_trade(-deal)
+    def evaluate_deal(self, deal):
+        self.utility() < self.make_trade(deal).utility()
 
+    def make_trade(self, deal):
+        return
+
+    # def learn(self, deal, learning_rate=self.learning_rate):
+    #     self.trade_params = self.trade_params + learning_rate * deal.Q
     def learn(self, deal):
-        self.trade_params = self.trade_params + self.learning_rate * deal
+        return
 
 
-# NOTE:
-# I could allow exchanges to involve a timing vector. e.g. I pay
-# today for something to be received in the future. Or I borrow today
-# and pay in the future
+class Contract():
+    """A class to hold information about a proposed trade"""
+    def __init__(self, A1, A2):
+        self.A1 = A1
+        self.A2 = A2
+        self.quantities = np.zeros(A1.model.num_goods)
 
+    def random_trade(self):
+        return
 
-class Trade():
-    """A contract between two agents"""
-    def __init__(self, A1, A2, quantities, times):
-        self.A1 = A1  # The initiator/buyer
-        self.A2 = A2  # The receiver/seller
-        self.Q = quantities
-        self.T = times
-        self.complete = False
-        self.acceptable = False
-        # bring in the timing vector. For now I'll just use a vector of 0s
-        # self.times = np.zeros(model.num_goods)
+    def null_trade(self, fraction):
+        return(np.multiply(np.add(self.A1.ppf, self.A2.ppf)), fraction)
 
-    def step(self):
-        if not self.acceptable:
-            return  # nothing to do
-        for i in range(self.model.num_goods):
-            if self.times[i] == 0:
-                self.A1.endowment[i] += self.deal[i]
-                self.A2.endowment[i] -= self.deal[i]
-       if max(self.times <= 0):
-           self.complete = True
+    def reverse(self):  # Do I have to be careful about return/update?
+        self.quantities = np.multiply(self.quantities, -1)
 
-    def acceptable1(self):
-        self.A1.eval_trade(self)
-
-    def acceptable(self):
-        self.A1.eval_trade(self) and self.A2.eval_trade(self)
 
 class MarketModel(Model):
     """A barter economy with N agents and K goods"""
@@ -147,3 +105,8 @@ class MarketModel(Model):
     def step(self):
         self.schedule.step()
         # remove unacceptable trades?
+
+
+model = MarketModel(2, 2, 2, 2)
+for i in range(20):
+    model.step()
