@@ -176,3 +176,31 @@ I left myself as comments. I've started cleaning up the code I actually want in
 the model.py file. I've left more holes than when I started, but it's also a bit
 cleaner. I've got my hour in, but now I've got to get back to work on other stuff...
 
+
+### R1D4 - 2020-07-30
+
+Okay, throwing myself back in here! Probably going to face interruptions with
+plumbers and work meetings.
+
+Learning about numpy.ma module... masked arrays!
+
+37 minutes in and I'm taking a break... got to get ready to see a plumber and
+also try to attend a zoom meeting.
+
+Alright, I got my hour in, but the last bit was writing on post it notes. Time
+to add those results into the script and report to Twitter.
+
+Here's the main thing I accomplished on post its: 
+self.dU gives the partial derivative of the agent's utility function (assuming
+Cobb Douglas form) which means I can have agents try to buy whatever yields the
+greatest dU/P.
+
+I'm thinking I'll build out the trade mechanics so an agent tries to buy
+whatever they expect will be best per dollar. They can then offer stuff based on
+their price vector (using good 0 as the numeraire) and let the partner choose
+whatever maximizes utility... or based on their price vector.
+
+Although, I should be concerned about the possibility of buying something with
+the intent to resell... maybe they'll have some other layer of parameters to
+allow buying for use and buying for resale to emerge. Maybe let them flip a
+weighted coin to choose between buying for resale or engaging in more production...
