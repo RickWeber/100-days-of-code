@@ -204,3 +204,85 @@ Although, I should be concerned about the possibility of buying something with
 the intent to resell... maybe they'll have some other layer of parameters to
 allow buying for use and buying for resale to emerge. Maybe let them flip a
 weighted coin to choose between buying for resale or engaging in more production...
+
+### R1D4 - 2020-07-31
+
+Okay, I've got the dU stuff set up from yesterday, let's go make it useful!
+
+I'm bamboozling myself! Do I have too many moving parts? Let me lay out my
+thoughts to clear my head:
+
+A1 approaches A2 and says "hey, item 1 would give me the most utils per dollar!
+Are you willing to sell?" And initiates an offer with quantities corresponding
+to ...
+
+[you know what... maybe I'm distracting myself with the utility stuff... maybe I
+want it, but I don't want it to drive behavior? Or maybe I want it to adjust
+over time to reflect what an agent learns from good or bad trades?]
+
+... their own price vector (converted in terms of whatever good A1 is looking to
+buy). 
+
+A2 looks at this set of offers ("I give item 1, they return either x_0 of item
+0, or x_2 of item 2...") and chooses the offer with the best price compared to
+their own prices. Which means what, exactly?
+In utility terms, we could just multiply partner.dU by offer.prices and choose
+the item with the least impact on utility
+In price terms... I guess convert each of them back into the numeraire! Okay, I
+think that solves my puzzle. I do need to tidy things up, but let's keep
+throwing things at the wall as long as lots of it is sticking.
+
+I'm still dyslexing at this. I'm going to go find some lunch and come back to
+this shortly
+
+Here's something to archive in the notes:
+
+#+BEGIN_SRC python
+
+    def compare_prices(self, price_vector):
+        """
+        given an offered price vector, this returns a vector of quantities
+        representing how many units of the numeraire self would normally
+        expect based on self.prices
+
+        So if the offer is [-1 1 25 1/4]
+        they're selling the numeraire, so they can directly compare that
+        vector to self.prices
+        If the offer is [4 -1 2 1/2] then they're selling good 1.
+        If self.prices is [1 2 3 4]
+        We're dealing with something equivalent to 2 units of numeraire.
+        So the offer is to accept 4 units of numeraire to give up something
+        worth 2 units. For good 2, the offer is 2 of something worth 3
+        numeraire which is a better deal. The final item for offer is
+        1/2 unit of good 3 which is only worth 2 units of numeraire.
+        """
+        # buy = np.argmax(price_vector)
+        price_vector = -price_vector
+        # buy = np.argmin(price_vector)  # there should be one negative
+        # cost = self.prices[buy]  # how many numeraire am I giving up?
+        consider = np.multiply(self.prices, price_vector)
+        return consider / price_vector
+        # sell = np.argmax(consider)  # or min?
+
+#+END_SRC
+
+So, I've built a trade mechanism where two agents trade one good for another
+based on a) what the buyer wants for utility maximization, and b) what the
+seller thinks about the prices offered.
+
+Since agents will both buy and sell, they'll each tend to maximize their utility
+as buyer and evaluate things relative to prices as sellers. I'll have to
+convince myself that that's totally okay. But first I need to make sure they're
+learning appropriately.
+
+Okay, I've left a bit of a mess, especially in the update_prices() method. But
+here's what I've got to do next:
+
+* git commit/push
+* delete old comments (if I *really* need them, they're in the old commit!)
+* write out a reduced form of the model. See what I can throw out
+* build that minimal model in, then...
+* make it flexible enough that I can throw more crap in!
+* But really, get it to actually run!
+
+So, here's a goal for the next week: get the minimum viable model operating!

@@ -58,13 +58,59 @@ class BarterAgent(Agent):
         production = np.dot(self.plan, self.ppf) / sum(self.plan)
         self.endowment = self.endowment + production
 
-    def trade(self):
+    def random_partner(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         if len(cellmates) < 1:
             return
-        partner = self.random.choice(cellmates)
+        self.random.choice(cellmates)
+
+    def U_max_trade(self, partner):  # I don't like this method name
+        deal = Contract(self, partner)  # null trade
+        utils_per_dollar = self.dU / self.prices
+        buying = np.argmax(utils_per_dollar)
+        prices = self.convert_prices(buying)
+        deal.quantities[not buying] = prices[not buying]
+        deal.quantities[buying] = -1
+        selling = partner.pick_best_offer(deal.quantities)
+        if buying == selling:
+            return  # nothing to trade here
+        deal.quantites[not buying and not selling] = 0
+        self.update_prices(deal)
+        partner.update_prices(deal)
+        # Q = deal.quantities
+        # Q[np.argmax(utils_per_dollar)] = 1
+        # Q[not np.argmax(utils_per_dollar)] = self.prices[not np.argmax(utils_per_dollar)]
+        return deal
+
+    def update_prices(self, deal):
+        """
+        The deal.quantities will look like this: [0 0 -1 0 4.5]
+        In which case, I want an agent to convert this to the numeraire
+        [0 0 some_price 0 some_price]
+        Good 2 for good 4, what price did this deal go at?
+        """
+        bought = np.argmin(deal.quantities)
+        sold = np.argmax(deal.quantities)
+        if bought == 0:
+            prices = abs(deal.quantities)
+        if sold == 0:
+            prices = abs(1 / deal.quantities)  # probably wrong, will fix later
+            # actually, I think that's right!
+        prices = deal.quantities / self.prices[bought]
+        # prices = deal.quantities / self.prices
+        # prices = deal.quantities / self.prices[np.argmin(deal.quantities)]
+        # convert the prices to be in terms of the numeraire
+        update = self.learning_rate * prices
+        self.prices = (1 - self.learning_rate) * self.prices + update
+
+    def convert_prices(self, buying=0):  # pretty sure that's fine...
+        return self.prices / self.prices[buying]
+
+    def trade(self):
+        partner = self.random_partner()
+        deal = self.U_max_trade(partner)
         # deal = Contract(self, partner).random_trade()
-        deal = Contract(self, partner).null_trade(1/10)
+        # deal = Contract(self, partner).null_trade(1/10)
         # alternately...
         # try to buy item with max self.dU / self.prices
         # offer to sell any of the other goods in units
@@ -78,6 +124,22 @@ class BarterAgent(Agent):
         self.make_trade(deal)
         partner.make_trade(deal.reverse())
         # self.learn()
+
+    def negotiate(self, deal):
+        # what does my partner want from me?
+        selling = np.argmax(deal.quantities)
+        # what item are they offering the best price for?
+        # marginal_effects = self.dU / deal.quantities
+        # I should turn down the deal entirely if their prices are
+        # higher than mine for not selling
+        N = self.model.num_goods
+        for i in range(N):
+            if i == selling:
+                next
+            if -deal.quantities[i] < self.prices[i]:
+                next
+            buying = i
+        return
 
     def utility(self):
         utils = 0
@@ -110,6 +172,34 @@ class BarterAgent(Agent):
         update = np.multiply(learning_rate, deal.quantities)
         self.trade_params += update
 
+    def compare_prices(self, price_vector):
+        """
+        given an offered price vector, this returns a vector of quantities
+        representing how many units of the numeraire self would normally
+        expect based on self.prices
+
+        So if the offer is [-1 1 25 1/4]
+        they're selling the numeraire, so they can directly compare that
+        vector to self.prices
+        If the offer is [4 -1 2 1/2] then they're selling good 1.
+        If self.prices is [1 2 3 4]
+        We're dealing with something equivalent to 2 units of numeraire.
+        So the offer is to accept 4 units of numeraire to give up something
+        worth 2 units. For good 2, the offer is 2 of something worth 3
+        numeraire which is a better deal. The final item for offer is
+        1/2 unit of good 3 which is only worth 2 units of numeraire.
+        """
+        # buy = np.argmax(price_vector)
+        price_vector = -price_vector
+        # buy = np.argmin(price_vector)  # there should be one negative
+        # cost = self.prices[buy]  # how many numeraire am I giving up?
+        consider = np.multiply(self.prices, price_vector)
+        return consider / price_vector
+        # sell = np.argmax(consider)  # or min?
+
+    def pick_best_offer(self, price_vector):
+        consider = np.multiply(self.prices, price_vector)
+        return np.argmax(consider)
 
 class Contract():
     """A class to hold information about a proposed trade"""
@@ -122,7 +212,7 @@ class Contract():
     def random_trade(self):
         return
 
-    def null_trade(self, fraction=1/2):
+    def null_trade(self, fraction=1/2):  # this should be renamed
         Q = np.multiply(np.add(self.A1.ppf, self.A2.ppf), fraction)
         self.quantities = Q
         self.times = np.zeros(self.A1.model.num_goods)
