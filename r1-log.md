@@ -286,3 +286,22 @@ here's what I've got to do next:
 * But really, get it to actually run!
 
 So, here's a goal for the next week: get the minimum viable model operating!
+
+### R1D5 - 2020-08-01
+
+Putting down the model because it's the weekend. So instead, I'm watching statquest walk through XGBoost in python
+
+### R1D6 - 2020-08-03
+
+Okay, I stumbled this weekend. Lesson learned: don't leave it till the evening.
+On the other hand, summer semester has been pretty exhausting and I needed a
+break. Next weekend I'll get in a proper coding session at least one of the days.
+
+So, now it's time to go back into the model. I think I might need to gut it
+again. Clean it out as I roll the good stuff into its own refactor...
+
+Alright! I think the script makes a lot more sense now. Got rid of some
+duplication, built in some functionality for evolution (I have to finish the
+noise adding method, but I can at least average two agents.)
+
+I'm back on a roll!
