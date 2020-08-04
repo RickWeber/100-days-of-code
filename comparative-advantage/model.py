@@ -17,7 +17,10 @@ class BarterAgent(Agent):
         self.plan = np.ones(3)
         self.production_plan = np.ones(model.num_goods)
         self.ppf = np.random.randint(4, size=(model.num_goods))
-        self.util_params = np.ones(model.num_goods) / model.num_goods
+        util_params = np.ones((model.num_goods - 1)) / (model.num_goods - 1)
+        self.util_params = np.append([0], util_params)
+        # self.util_params = [0, ones]
+        # self.util_params = np.ones(model.num_goods) / model.num_goods
         self.endowment = np.zeros(model.num_goods)
         self.discount_rate = np.random.uniform(0.01, 0.25)
         self.learning_rate = np.random.uniform(0.01, 0.25)

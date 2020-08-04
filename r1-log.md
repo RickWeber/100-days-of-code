@@ -305,3 +305,75 @@ duplication, built in some functionality for evolution (I have to finish the
 noise adding method, but I can at least average two agents.)
 
 I'm back on a roll!
+
+### R1D7 - 2020-08-04
+
+Okay, the code should document itself, but it's not there. So I'm going to
+describe it here, then mush it around in the model file. Remember: the goal is
+"minimum viable model" by week's end. And I've got to send an abstract to NYSEA.
+But that's later.
+
+Here's the model as it should be:
+
+A market contains N agents
+Those agents can produce K goods
+Agents differ in their ability and preferences
+(Although maybe I want the option to have homogeneous preferences and/or utility)
+They have some idea of how many of any one good goes for one unit of good 0
+They encounter each other *somehow*
+(Eventually I want a path dependent network, a fixed network, and spatial encounters)
+For now, they match up randomly
+The agent initiating the trade looks to buy one unit of one good
+They're buying the good with greatest marginal utility per "dollar"
+They offer to give their partner one of the K-1 other goods
+The quantities they offer are based on their expectation of prices
+(perhaps they should have a modifier... i.e. whether they lowball or highball offers)
+So if they're looking to buy one unit of good 0, they're offer their vector of prices
+The partner considers an offer vector and compares it to their price vector
+The best offer is whichever converts to the most units of good 0 
+If the best offer is item they're being asked to sell, they won't
+They accept a deal where they sell one good to another agent 
+If accepted, the buyer gains one unit of a good and gives up some of another
+And the reverse for the seller
+They learn something as a result of the (non)exchange
+If no trade, buyer increases estimated price of what they wanted to buy
+If no trade, seller revises price estimates towards buyer's estimates
+
+
+(I need an arbitrage function to allow middle man specialization. Not just buying
+for consumption, but buying because the agent knows someone's willing to pay more)
+
+
+(At some point I want agents to shift their allocation of effort between
+producing, trading, and searching)
+(I'm noticing that there isn't much opportunity for agents to observe their
+environment and decide behavior accordingly.)
+
+#### Digression
+Okay, I took a second to adjust the utility function so that good 0 is treated
+differently than the others. I should look in Varian to see if that's a decent
+move. I'm not going to worry about it for now though. But while I was adding
+that code I think I noticed something different about python compared to R. 
+
+In order to keep the text editor from complaining about lines being too long, I
+had to define a variable that I was going to use once and never again. In R, I'd
+want to ls() on the console and see what's there. In my code I'd want to get
+rm() stuff I don't need. Is this what garbage collection is about? I'm just
+supposed to drop garbage on the floor and trust the interpreter to not get
+bogged down with stuff? I'm not going to distract myself with this. I'll learn
+the truth at some point, but the thought's worth having before then.
+
+#### Back to it!
+
+Sometimes an agent might want to arbitrage. What does that look like?
+
+get an estimate of the distribution of other agents' price vectors. Start buying
+from anyone with especially low prices and hold on to goods with the hope of
+selling to people with especially high prices (for any given good).
+
+For this to work, an agent basically needs two or three price vectors. A min,
+max, and average. A utility seeking consumer might look at their average vector
+to decide what to try to buy. But an arbitraging trader will look to a) find out
+what prices people have and b) try to keep items in stock to sell.
+
+#### Actually, let's take a quick break...
