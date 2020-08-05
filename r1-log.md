@@ -418,3 +418,10 @@ Then update the plan (the buy/sell vector, price info, etc.)
 
 I'll come back to this later. Or maybe I'll push the rest of today's work to
 tomorrow. We'll see how I feel after class. 
+
+### R1D8 - 2020-08-05 part 2
+
+My brain just isn't wanting this right now. But I've got to do something, so I'm
+going to do the next coding item on today's todo list: I'm going to follow along
+with someone's TidyTuesday R broadcast. Less time on python, less time on this
+project, but a chance to reset my brain a little bit.

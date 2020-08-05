@@ -15,12 +15,31 @@ class Arbitrageur(Agent):
         self.sell_plan = np.random.rand(model.num_goods)  # Do I plan to resell
         self.prod_plan = np.ones(model.num_goods)
         self.ppf = np.random.randint(4, size=(model.num_goods))
-        util_params = np.ones((model.num_goods - 1)) / (model.num_goods - 1)
-        self.utility = np.append([0], util_params)
+        # util_params = np.ones((model.num_goods - 1)) / (model.num_goods - 1)
+        # self.utility = np.append([0], util_params)
         self.endowment = np.zeros(model.num_goods)
         self.discount_rate = np.random.uniform(0.01, 0.25)
         self.learning_rate = np.random.uniform(0.01, 0.25)
         self.prices = np.divide(self.ppf, self.ppf[0])
+        self.price_var = np.zeros(model.num_goods)
+        # Maybe there's a variable threshold for willingness to buy when
+        # the price is low enough?
+
+    def step(self):
+        # choose between producing or trading. Don't worry about moving...
+        ev_trade = 10
+        ev_produce = 10
+        if ev_trade > ev_produce:
+            self.trade()
+        else:
+            self.produce()
+
+    def trade(self):
+        partner = self.find_partner()
+        good_to_buy = np.random.randint(self.model.num_goods + 1)
+        if partner.prices[good_to_buy] < self.prices[good_to_buy]:
+            offer = self.prices
+            offer[good_to_buy] = -1
 
 
 class BarterAgent(Agent):
