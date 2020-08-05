@@ -377,3 +377,44 @@ to decide what to try to buy. But an arbitraging trader will look to a) find out
 what prices people have and b) try to keep items in stock to sell.
 
 #### Actually, let's take a quick break...
+
+Okay, I've had a think and I'm realizing a few things, most importantly, that
+the model needs time. 
+
+Agents should decide to either buy with the intent to consume, or buy with the
+intent to sell at a higher price later.
+
+This is going to make utility harder. I might have to look through my textbooks
+to figure this out. Agents will be asking about their expected utility, and that
+can't be as simple as getting utility for everything they own because they might
+be planning on selling most of it. 
+
+Maybe I drop the utility() method and just have agents try to maximize how much
+numeraire they get.
+
+### R1D7 - 2020-08-04 (next day update)
+
+Big storm yesterday led to a blackout. I did some more work on paper, so I'm
+counting the day as a success overall.
+
+### R1D8 - 2020-08-05
+
+Each agent has the following key attributes:
+* a PPF (what they're capable of producing)
+* a vector or prices (possibly more than one, or a vector of average prices plus
+  a vector of variance of prices)
+* a buy/sell plan vector
+i.e. for each product, what is the probability the agent goes out to try to buy
+it (in order to consume), or that they intend to buy or produce it in order to
+sell to someone else.
+
+Here's a simple step() function:
+Choose a good. If the plan is to sell that good, then find a trading partner and
+either buy from them (if their price is low enough) or sell to them (if their
+price is high enough)
+If the plan is to buy the good, then make them an offer and let them decide
+which good they'll accept in exchange (based on their price vector)
+Then update the plan (the buy/sell vector, price info, etc.)
+
+I'll come back to this later. Or maybe I'll push the rest of today's work to
+tomorrow. We'll see how I feel after class. 

@@ -7,6 +7,22 @@ from mesa.space import MultiGrid
 # from mesa.datacollection import DataCollector
 
 
+class Arbitrageur(Agent):
+    def __init__(self, unique_id, model):
+        """An agent that buys and sells based on expectations """
+        super().__init__(unique_id, model)
+        self.model = model
+        self.sell_plan = np.random.rand(model.num_goods)  # Do I plan to resell
+        self.prod_plan = np.ones(model.num_goods)
+        self.ppf = np.random.randint(4, size=(model.num_goods))
+        util_params = np.ones((model.num_goods - 1)) / (model.num_goods - 1)
+        self.utility = np.append([0], util_params)
+        self.endowment = np.zeros(model.num_goods)
+        self.discount_rate = np.random.uniform(0.01, 0.25)
+        self.learning_rate = np.random.uniform(0.01, 0.25)
+        self.prices = np.divide(self.ppf, self.ppf[0])
+
+
 class BarterAgent(Agent):
     def __init__(self, unique_id, model):
         """
