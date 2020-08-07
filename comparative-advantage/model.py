@@ -14,6 +14,7 @@ class Market(Model):
         self.K = K
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
+        self.agent_productivity = K * 2
         # create agents
         for i in range(N):
             a = BarterAgent(i, self)
@@ -31,30 +32,49 @@ class BarterAgent(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.model = model
-        self.ppf = np.random.randint(4, size=(model.N))
-        self.price_avg = np.divide(self.ppf, self.ppf[0])
-        # self.price_var = np.zeros(model.N)
-        self.observations = 0
-        self.price_S = np.zeros(model.N)
-        self.price_SS = np.zeros(model.N)
-        self.update_prices(self.price_avg)
-
-    def update_prices(self, new_prices):
-        self.observations += 1
-        self.price_S += new_prices
-        self.price_SS += new_prices * new_prices
-
-    def price_var(self):
-        # This is the naive algorithm on the wikipedia page for
-        # "Algorithms for calculating variance"
-        if self.observations <= 1:
-            out = np.zeros(self.model.N)
-        else:
-            x1 = self.price_SS
-            x2 = self.price_S * self.price_S
-            x2 = x2 / self.observations
-            out = (x1 - x2) / (self.observations - 1)
-        return np.sqrt(out)
+        # self.ppf = np.random.randint(4, size=(model.K))
+        self.ppf = np.zeros(model.K)
+        self.plan = np.ones(model.K)
+        for i in range(model.agent_productivity):
+            self.ppf[np.random.randint(model.K)] += 1
+        self.plan = np.ones(model.K)
+        self.endowment = np.zeros(model.K)
 
     def step(self):
-        next
+        self.trade()
+
+    def produce(self):
+        prod = np.multiply(self.plan, self.ppf)
+        self.endowment += prod
+
+    def find_partner(self):
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])
+        if len(cellmates) < 1:
+            return False
+        self.random.choice(cellmates)
+
+    # this could be prettier...
+    def trade(self):
+        partner = self.find_partner()
+        if not partner:
+            return False
+        buyer_gives = np.random.randint(self.model.K)
+        seller_gives = np.random.randint(self.model.K)
+        if buyer_gives == seller_gives:
+            return False
+        q_buy = self.ppf[buyer_gives]
+        q_sell = partner.ppf[seller_gives]
+        if (q_buy == 0) or (q_sell == 0):
+            return False
+        buyer_tradeoff = self.ppf[buyer_gives] / self.ppf[seller_gives]
+        seller_tradeoff = self.ppf[seller_gives] / self.ppf[buyer_gives]
+        if buyer_tradeoff > (q_buy / q_sell):
+            return False
+        if seller_tradeoff > (q_sell / q_buy):
+            return False
+        self.endowment[buyer_gives] -= q_buy
+        partner.endowment[seller_gives] -= q_sell
+        partner.endowment[buyer_gives] += q_buy
+        self.endowment[seller_gives] += q_sell
+        self.plan[buyer_gives] += 1
+        partner.plan[seller_gives] += 1

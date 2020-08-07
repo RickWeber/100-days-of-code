@@ -447,3 +447,10 @@ selected goods, and let the quantities be proportional to each agent's
 capabilities, then update production plans in the direction of what the agent
 successfully sells. It means no arbitrageurs, but it means a simple model that
 works. I can layer on complexity later.
+
+### R1D10 - 2020-08-07
+
+Alright, I just reduced model.py from 280 lines to 80. "Works" is maybe too
+strong a word, but I'm actually pulling the code into the REPL, so it's a whole
+lot better than what I had at the start of the week!
+
