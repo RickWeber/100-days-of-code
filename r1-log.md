@@ -425,3 +425,25 @@ My brain just isn't wanting this right now. But I've got to do something, so I'm
 going to do the next coding item on today's todo list: I'm going to follow along
 with someone's TidyTuesday R broadcast. Less time on python, less time on this
 project, but a chance to reset my brain a little bit.
+
+### R1D9 - 2020-08-06 
+
+Okay, I've been throwing stuff at the wall to see what sticks, but now I've got
+a mess, so I'm backing up what I've got and starting from scratch(ish) again. 
+
+I think I want agents to have some idea of average prices, but also some idea of
+variation in prices (i.e. is it worth while to buy from someone with extra low
+prices?) So I'm going to learn about incremental algorithms for calculating variance.
+
+Okay, I've found a useful wikipedia page: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Weighted_incremental_algorithm
+
+I think I'll need to fix it to use numpy, but I can do that later.
+
+### R1D9 - 2020-08-06
+
+I'm over-complicating the model. At least as of right now. Tomorrow I'll
+simplify. Forget about all this price stuff. Let the trades be two randomly
+selected goods, and let the quantities be proportional to each agent's
+capabilities, then update production plans in the direction of what the agent
+successfully sells. It means no arbitrageurs, but it means a simple model that
+works. I can layer on complexity later.
