@@ -454,3 +454,23 @@ Alright, I just reduced model.py from 280 lines to 80. "Works" is maybe too
 strong a word, but I'm actually pulling the code into the REPL, so it's a whole
 lot better than what I had at the start of the week!
 
+### R1D11 - 2020-08-08
+
+As long as everyone's PPF sums to the same number, I should be able to induce
+gains from specialization by making the default trade be one day's productivity
+from one agent for one day's productivity form the other. Although, I'm not sure
+how to update agent behavior in that case... Not without making a lot more
+complexity. 
+
+Okay, here's what I've done today (might do more later):
+created two trade methods: the random trade I had built into trade() and a trade
+of one day's work in either direction. Those are called after finding a partner.
+The code is at least a bit more modular now. 
+
+I've also got a method to increment the production plan, but it's not really
+saving much. I wonder if I should make it take the trading partner as input,
+calculate tradeoffs, then update both agents appropriately. That could make it
+useful for the day_trade method. 
+
+The model is simple right now, but it should basically work. What I need to do
+next is figure out the data collector.

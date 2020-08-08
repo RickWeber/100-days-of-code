@@ -41,6 +41,7 @@ class BarterAgent(Agent):
         self.endowment = np.zeros(model.K)
 
     def step(self):
+        self.produce()
         self.trade()
 
     def produce(self):
@@ -58,23 +59,45 @@ class BarterAgent(Agent):
         partner = self.find_partner()
         if not partner:
             return False
+        self.day_trade(partner)
+        # I'm not sure how to update behavior for day_trade
+        self.random_trade(partner)
+        self.update_plans(partner)
+
+    def random_trade(self, partner):
         buyer_gives = np.random.randint(self.model.K)
         seller_gives = np.random.randint(self.model.K)
-        if buyer_gives == seller_gives:
-            return False
         q_buy = self.ppf[buyer_gives]
         q_sell = partner.ppf[seller_gives]
         if (q_buy == 0) or (q_sell == 0):
             return False
         buyer_tradeoff = self.ppf[buyer_gives] / self.ppf[seller_gives]
         seller_tradeoff = self.ppf[seller_gives] / self.ppf[buyer_gives]
-        if buyer_tradeoff > (q_buy / q_sell):
-            return False
-        if seller_tradeoff > (q_sell / q_buy):
+        good_buy = buyer_tradeoff > (q_buy / q_sell)
+        good_sell = seller_tradeoff > (q_sell / q_buy)
+        if not good_sell or not good_buy:
             return False
         self.endowment[buyer_gives] -= q_buy
         partner.endowment[seller_gives] -= q_sell
-        partner.endowment[buyer_gives] += q_buy
         self.endowment[seller_gives] += q_sell
-        self.plan[buyer_gives] += 1
-        partner.plan[seller_gives] += 1
+        partner.endowment[buyer_gives] += q_buy
+        # self.plan[buyer_gives] += 1
+        # partner.plan[seller_gives] += 1
+        self.inc_plan(buyer_gives)  # is this really better than above?
+        partner.inc_plan(seller_gives)
+
+    def day_trade(self, partner):
+        prod1 = np.multiply(self.ppf, self.plan)
+        prod2 = np.multiply(partner.ppf, partner.plan)
+        # diff = np.subtract(prod1, prod2)
+        self.endowment = np.subract(self.endowment, prod1)
+        partner.endowment = np.subract(partner.endowment, prod2)
+        self.endowment = np.add(self.endowment, prod2)
+        partner.endowment = np.add(partner.endowment, prod1)
+
+    def inc_plan(self, good):
+        self.plan[good] += 1
+
+    def update_plans(self, partner):
+        # update production plans in direction of comparative advantage
+        return True
