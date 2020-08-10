@@ -474,3 +474,41 @@ useful for the day_trade method.
 
 The model is simple right now, but it should basically work. What I need to do
 next is figure out the data collector.
+
+### R1D12 - 2020-08-10
+
+Took Sunday off. I think I'll let that be the norm. It's good to have a head
+clearing day.
+
+Alright, I've got a couple plan updating methods. I'm assuming that agents want
+to maximize the sum of squared production. For the individual plan update (when
+there's no trade to be had), choose one good at random, and see what happens to
+the utility function (which is just the dot product of production). 
+I'm going to rename that method utility to avoid confusion later on.
+
+Alright, I've got a slightly wonky implementation set up. It's just about ready
+to take for a spin! But first let me wrap my head around what I've got:
+
+A market with N agents and K goods and some size.
+Agents produce some of the goods, possibly move, then attempt to trade.
+If they don't trade successfully, they increase their chance of moving, then
+either move or produce again--but only a fraction of a day's production.
+
+That's a bit more complexity than necessary, but it shouldn't mess things up too
+much right now. And later on I can make it tuneable.
+
+My produce and move methods seem fine (though I don't know how well move() will
+work in a 1 pixel world).
+
+I think my day_trade() method forces their hand. I should give agents an out if
+they don't gain from trade. But I can do that later.
+
+I also think agents will end up with infinite quantities of each good as it
+currently stands.
+
+I've been struggling against a list comprehension that doesn't want to sum.
+Ultimately I just (for now) put in a for loop. Got through that. Sorted some
+other bugs. And I've got something that will (basically) run!
+
+It's not there yet, but it's doing something. Plan for tomorrow: write up the
+abstract and start outlining the paper.
