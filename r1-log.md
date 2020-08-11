@@ -512,3 +512,32 @@ other bugs. And I've got something that will (basically) run!
 
 It's not there yet, but it's doing something. Plan for tomorrow: write up the
 abstract and start outlining the paper.
+
+### R1D13 - 2020-08-11
+
+I'm simplifying my methods, but things are a bit of a mess at the moment. I'm
+also not sure if I like using a dictionary to hold deal information. Maybe I'll
+fix that tomorrow.
+
+In any case, here's what I've got:
+
+First, a simpler step method. Produce, move (probably... that's just to make it
+easier to avoid moving in a 1 pixel world), then trade (unless the model forbids
+it)
+
+If there's no trade, agents update production plans to enhance their utility.
+
+If there is trade, they look for a partner, propose a deal (either one day of my
+work for one day of yours, or one unit of a random item for some of another
+item, based on the initiating agent's ppf).
+
+If both agents are okay with the deal, they make the trade. Otherwise, they
+consider if producing more of some item would increase their utility.
+
+#### Things to look out for/fix:
+Make sure I don't end up with infinite units of all goods.
+
+Make sure that when we evaluate possible changes, we aren't changing
+plans/endowments/whatever without changing it back when necessary
+
+Built in some reporters for running experiments.

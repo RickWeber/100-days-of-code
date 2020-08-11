@@ -4,6 +4,11 @@ import numpy as np
 from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
+from mesa.datacollection import DataCollector
+
+
+def utility(agent):
+    return agent.utility()
 
 
 class Market(Model):
@@ -15,7 +20,9 @@ class Market(Model):
         self.rand_trade = rand_trade
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
+        self.running = True  # for BatchRunner()
         self.agent_productivity = K * 3
+        self.allow_trade = True
         # create agents
         for i in range(N):
             a = BarterAgent(i, self)
@@ -23,8 +30,15 @@ class Market(Model):
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
             self.grid.place_agent(a, (x, y))
+        # collect data
+        self.datacollector = DataCollector(
+            model_reporters={},
+            agent_reporters={"Utility": utility}
+        )
+        self.history = []
 
     def step(self):
+        self.datacollector.collect(self)
         self.schedule.step()
 
 
@@ -41,16 +55,16 @@ class BarterAgent(Agent):
         self.endowment = np.zeros(model.K)
         self.utility_params = np.random.rand(model.K)
         self.move_preference = np.random.randint(100)
+        self.trading = False
+        self.generosity = 0.95
 
     def step(self):
         self.produce()
         self.prob_move()
-        if self.trade(self.model.rand_trade):
-            return True
+        if self.model.allow_trade:
+            self.trade(self)
         else:
-            self.move_preference += 1
-            if not self.prob_move():
-                self.produce(0.1)
+            self.update_plan(np.random.randint(self.model.K))
 
     def produce(self, factor=1):
         prod = np.multiply(self.plan, self.ppf)
@@ -58,11 +72,13 @@ class BarterAgent(Agent):
         self.endowment += prod
         return True
 
-    def move(self):  # ripped off from mesa tutorial
+    def move(self):
         possible_moves = self.model.grid.get_neighborhood(
             self.pos,
             moore=True,
             include_center=False)
+        if possible_moves.length() < 1:
+            return False
         new_position = self.random.choice(possible_moves)
         self.model.grid.move_agent(self, new_position)
         return True
@@ -80,53 +96,73 @@ class BarterAgent(Agent):
             return False
         return self.random.choice(cellmates)
 
-    # this could be prettier...
-    def trade(self, random=False):
+    def trade(self):
         partner = self.find_partner()
-        if not partner:
-            self.update_plan(np.random.randint(self.model.K))
-            return partner
-        if random:
-            deal = self.random_trade(partner)
-            if not deal:
-                self.update_plan(np.random.randint(self.model.K))
-                return deal
-            else:
-                self.update_plan(deal[0][0])
-                partner.update_plan[deal[1][0]]
+        if self.model.rand_trade:
+            deal = self.random_trade()
         else:
-            self.day_trade(partner)
+            deal = self.day_trade(partner)
+        if self.eval_trade(deal) and partner.eval_trade(deal, reverse=True):
+            self.make_trade(deal)
             self.update_plans(partner)
-        return True
+        else:
+            self.update_plan(np.random.randint(self.model.K))
 
-    def random_trade(self, partner):
+    def reverse_trade(self, deal):
+        new_deal = {"buying": deal["selling"],
+                    "selling": deal["buying"],
+                    "quantity_buying": deal["quantity_selling"],
+                    "quantity_selling": deal["quantity_buying"]}
+        return new_deal
+
+    def random_trade(self):
+        deal = {"buying": np.zeros(self.model.K),
+                "selling": np.zeros(self.model.K),
+                "quantity_buying": np.zeros(self.model.K),
+                "quantity_selling": np.zeros(self.model.K)}
         buyer_gives = np.random.randint(self.model.K)
         seller_gives = np.random.randint(self.model.K)
-        q_buy = self.ppf[buyer_gives]
-        q_sell = partner.ppf[seller_gives]
-        if (q_buy == 0) or (q_sell == 0):
-            return False
-        buyer_tradeoff = self.ppf[buyer_gives] / self.ppf[seller_gives]
-        seller_tradeoff = self.ppf[seller_gives] / self.ppf[buyer_gives]
-        good_buy = buyer_tradeoff > (q_buy / q_sell)
-        good_sell = seller_tradeoff > (q_sell / q_buy)
-        if not good_sell or not good_buy:
-            return False
-        self.endowment[buyer_gives] -= q_buy
-        partner.endowment[seller_gives] -= q_sell
-        self.endowment[seller_gives] += q_sell
-        partner.endowment[buyer_gives] += q_buy
-        return [[good_buy, q_buy], [good_sell, q_sell]]
+        deal["buying"][buyer_gives] = 1
+        deal["selling"][seller_gives] = 1
+        deal["quantity_buying"][buyer_gives] = 1
+        x = self.ppf[seller_gives] / self.ppf[buyer_gives]
+        deal["quantity_selling"][seller_gives] = x * self.generosity
+        return deal
 
     def day_trade(self, partner):
-        prod1 = self.calc_production()
-        prod2 = partner.calc_production()
-        # diff = np.subtract(prod1, prod2)
-        self.endowment = np.subtract(self.endowment, prod1)
-        partner.endowment = np.subtract(partner.endowment, prod2)
-        self.endowment = np.add(self.endowment, prod2)
-        partner.endowment = np.add(partner.endowment, prod1)
-        return True
+        if partner:
+            deal = {"buying": np.ones(self.model.K),
+                    "selling": np.ones(self.model.K),
+                    "quantity_buying": partner.calc_production(),
+                    "quantity_selling": self.calc_production()}
+        else:
+            deal = False
+        return deal
+
+    def eval_trade(self, deal, reverse=False):
+        """ Make sure my utility increases with a trade. """
+        if not deal:
+            return False
+        if reverse:
+            deal = self.reverse_trade(deal)
+        U1 = self.utility()
+        U2 = self.make_trade(deal).utility()
+        # I'm pretty sure I've got to fix that syntax.
+        prod_ratio = self.ppf[deal["buying"]] / self.ppf[deal["selling"]]
+        buy_ratio = deal["quantity_buying"] / deal["quantity_selling"]
+        if prod_ratio < buy_ratio:
+            U2 = 0
+        self.make_trade(self.reverse_trade(deal))
+        return U2 > U1
+
+    def make_trade(self, deal):
+        for i in deal["buying"]:
+            self.endowment[i] += deal["quantity_buying"]
+            # partner.endowment[i] -= deal["quantity_buying"]
+        for j in deal["selling"]:
+            # partner.endowment[j] += deal["quantity_selling"]
+            self.endowment[j] -= deal["quantity_selling"]
+        return self  # will this let me pipe stuff? I think it will.
 
     def inc_plan(self, good, up=True):
         if up:
