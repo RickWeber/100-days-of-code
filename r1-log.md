@@ -541,3 +541,30 @@ Make sure that when we evaluate possible changes, we aren't changing
 plans/endowments/whatever without changing it back when necessary
 
 Built in some reporters for running experiments.
+
+### R1D14 - 2020-08-12
+
+I think I want to look at the trade evaluation method more closely. Perhaps
+what's needed is for the agent to convert everything into terms of the
+numeraire. For the random_trade, the method seems fine. For a trade of A for B,
+compare that to the slope of my PPF between those dimensions. But for a trade
+with more than two goods, converting everything to the numeraire might be a
+better solution than the utility function. I'd prefer not to have that utility
+function do too much heavy lifting
+
+I do want to set things up to allow for time to matter; bringing the discount
+rate in to let agents think about the future more carefully. But I should
+probably leave that for the time being. 
+
+Okay, I'm getting trade evaluation in terms of the numeraire good instead of
+utility. I'll leave the utility reporter, particularly for the anarkic agents
+that might turn out to exist. But trades are evaluated in terms of tradeoffs.
+For now. In the future I'll generalize to allow agents to compare a deal's terms
+to some price vector (perhaps one returned by some other function) rather than
+just the agent's own PPF.
+
+I also need to tune the amount of trading happening relative to production. But
+I'm probably getting ahead of myself. 
+
+In any case, I continue the process of both adding and reducing entropy in the
+script. Tomorrow might need to be a slash and burn day.
