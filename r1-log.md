@@ -579,3 +579,6 @@ allow trade with money using this sort of functionality.
 In an effort to simplify, I've rebuilt the agent class. Most importantly, I went
 back to thinking of a trade as a vector of positive and negative numbers. I'll
 use integers just to shrink the search space.
+
+I reduced the agent class from 20 methods to just 9. It's a lot easier to read
+now, and it saved 100 lines of code.

@@ -55,20 +55,54 @@ class BarterAgent(Agent):
         sell = (np.random.rand((10, model.K)) - 0.5) < 0
         self.trades = np.random.randint(3, size=(10, model.K))  # 10 vectors
         self.trades[sell] *= -1
+        self.trade_plan = np.ones(10)
 
     def step(self):
         self.produce(2)
-        partner, deal = self.trade()
+        # partner, deal, dealnum = self.trade()
+        self.trade()
         self.consume()
         self.move()
-        self.update(deal)  # also executes trade
-        partner.update(-deal)
 
     def produce(self, factor=1):
         prod = np.multiply(self.plan, self.ppf)
         prod = np.multiply(prod, factor)
         self.endowment += prod
         return True
+
+    def trade(self):
+        partner = self.find_partner()
+        prob = self.trade_plan / self.trade_plan.sum()
+        dealnum = np.random.choice(range(10),
+                                   1,
+                                   p=prob)
+        deal = self.trades[dealnum]
+        good_for_goose = compare(deal, self.ppf) > 0
+        good_for_gander = compare(-deal, partner.ppf) > 0
+        if not good_for_goose or not good_for_gander:
+            deal = np.zeros(self.model.K)
+        else:
+            self.model.history.append((self.unique_id,
+                                       partner.unique_id,
+                                       deal))
+            self.endowment += deal
+            partner.endowment -= deal
+            self.update(deal)
+            partner.update(-deal)
+            self.trade_plan[dealnum] += 1
+        return self
+
+    def consume(self, ratio=1):
+        """Use up goods based on weighted probability"""
+        prob = self.u_params / sum(self.u_params)
+        consumption = self.model.agent_productivity
+        consumption = int(consumption * ratio)
+        for i in range(consumption):
+            good = np.random.choice(range(self.model.K),
+                                    1,
+                                    p=prob)
+            self.endowment[good] -= 1
+        return self
 
     def move(self):
         possible_moves = self.model.grid.get_neighborhood(
@@ -85,19 +119,6 @@ class BarterAgent(Agent):
         update = self.learning_rate * deal
         self.plan += update
         self.plan[self.plan < 0] = 0.1
-        self.endowment += deal  # actually execute the trade
-        return self
-
-    def consume(self, ratio=1):
-        """Use up goods based on weighted probability"""
-        prob = self.u_params / sum(self.u_params)
-        consumption = self.model.agent_productivity
-        consumption = int(consumption * ratio)
-        for i in range(consumption):
-            good = np.random.choice(range(self.model.K),
-                                    1,
-                                    p=prob)
-            self.endowment[good] -= 1
         return self
 
     def find_partner(self):
@@ -109,28 +130,8 @@ class BarterAgent(Agent):
                 return self
             return self.random.choice(cellmates)
 
-    def trade(self):
-        partner = self.find_partner()
-        prob = self.trade_plan / self.trade_plan.sum()
-        deal = np.random.choice(range(10),
-                                1,
-                                p=prob)
-        deal = self.trades[deal]
-        good_for_goose = compare(deal, self.ppf) > 0
-        good_for_gander = compare(-deal, partner.ppf) > 0
-        if not good_for_goose or not good_for_gander:
-            deal = np.zeros(self.model.K)
-        self.model.history.append((self, partner, deal))
-        return partner, deal
-
-    def calc_production(self):
-        return np.multiply(self.ppf, self.plan)
-
     def utility(self):
-        U = 0
-        for i in range(self.model.K):
-            U = U + self.endowment[i] ** self.utility_params[i]
-        return U
+        (self.endowment ** self.u_params).sum()
 
 
 def utility_reporter(agent):
