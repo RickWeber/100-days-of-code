@@ -568,3 +568,14 @@ I'm probably getting ahead of myself.
 
 In any case, I continue the process of both adding and reducing entropy in the
 script. Tomorrow might need to be a slash and burn day.
+
+I'm also getting a bit ahead of myself here, but just to put it down, I made a
+little function to make good 0 into a fixed resource with no use value. It would
+mess up evaluation functions, but the model as a whole could be reworked to
+allow trade with money using this sort of functionality.
+
+### R1D15 - 2020-08-13
+
+In an effort to simplify, I've rebuilt the agent class. Most importantly, I went
+back to thinking of a trade as a vector of positive and negative numbers. I'll
+use integers just to shrink the search space.

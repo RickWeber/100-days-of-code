@@ -6,25 +6,9 @@ from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
 
-def utility_reporter(agent):
-    """How much utility does agent have right now?"""
-    return agent.utility()
-
-
-def specialization_reporter(agent):
-    """How much of agent's time is spent on their most popular good?"""
-    return agent.plan.max() / agent.plan.sum()
-
-
-def reverse_trade(deal):
-    new_deal = {"buying": deal["selling"],
-                "selling": deal["buying"]}
-    return new_deal
-
-
 class Market(Model):
     """An economy with N agents and K goods"""
-    def __init__(self, N, K, width, height, rand_trade=False):
+    def __init__(self, N, K, width=1, height=1, rand_trade=False):
         super().__init__()
         self.N = N
         self.K = K
@@ -55,41 +39,30 @@ class Market(Model):
 
 
 class BarterAgent(Agent):
-    """An agent with capacities and price expectations"""
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
         self.model = model
         self.plan = np.ones(model.K)
-        self.ppf = np.zeros(model.K)
-        for i in range(model.agent_productivity):
+        self.ppf = np.ones(model.K)
+        for i in range(model.agent_productivity - model.K):
             self.ppf[np.random.randint(model.K)] += 1
-        self.plan = np.ones(model.K)
-        self.endowment = np.ones(model.K) * 3  # not sure if this will simplify
-        self.utility_params = np.random.rand(model.K)
-        self.move_preference = np.random.randint(100)
-        self.trading = False
-        self.generosity = 0.95
+        self.endowment = np.ones(model.K) * 3
+        u_params = np.random.randint(4, size=model.K)
+        self.u_params = u_params / u_params.sum()
+        self.generosity = np.random.normal(0.95, 0.025)
+        self.memory = np.zeros(model.K)
+        self.learning_rate = 0.05
+        sell = (np.random.rand((10, model.K)) - 0.5) < 0
+        self.trades = np.random.randint(3, size=(10, model.K))  # 10 vectors
+        self.trades[sell] *= -1
 
     def step(self):
-        self.produce()
-        self.prob_move()
-        if self.model.allow_trade:
-            self.trade(self)
-        else:
-            self.update_plan(np.random.randint(self.model.K))
-        self.consume(1/2)
-
-    def consume(self, ratio=1):
-        """Use up goods based on weighted probability"""
-        prob = self.utility_params / sum(self.utility_params)
-        consumption = self.model.agent_productivity / self.model.K
-        consumption = int(consumption * ratio)
-        for i in range(consumption):
-            good = np.random.choice(range(self.model.K),
-                                    1,
-                                    p=prob)
-            self.endowment[good] -= 1
-        return self
+        self.produce(2)
+        partner, deal = self.trade()
+        self.consume()
+        self.move()
+        self.update(deal)  # also executes trade
+        partner.update(-deal)
 
     def produce(self, factor=1):
         prod = np.multiply(self.plan, self.ppf)
@@ -108,122 +81,47 @@ class BarterAgent(Agent):
         self.model.grid.move_agent(self, new_position)
         return True
 
-    def prob_move(self):
-        if np.random.randint(100) < self.move_preference:
-            self.move()
-            return True
-        else:
-            return False
+    def update(self, deal):
+        update = self.learning_rate * deal
+        self.plan += update
+        self.plan[self.plan < 0] = 0.1
+        self.endowment += deal  # actually execute the trade
+        return self
+
+    def consume(self, ratio=1):
+        """Use up goods based on weighted probability"""
+        prob = self.u_params / sum(self.u_params)
+        consumption = self.model.agent_productivity
+        consumption = int(consumption * ratio)
+        for i in range(consumption):
+            good = np.random.choice(range(self.model.K),
+                                    1,
+                                    p=prob)
+            self.endowment[good] -= 1
+        return self
 
     def find_partner(self):
-        cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        if len(cellmates) < 1:
-            return False
-        return self.random.choice(cellmates)
+        if self.model.grid.width + self.model.grid.height < 10:
+            return self.model.schedule.agents[np.random.randint(self.model.N)]
+        else:
+            cellmates = self.model.grid.get_cell_list_contents([self.pos])
+            if len(cellmates) < 1:
+                return self
+            return self.random.choice(cellmates)
 
     def trade(self):
         partner = self.find_partner()
-        if self.model.rand_trade:
-            deal = self.random_trade()
-        else:
-            deal = self.day_trade(partner)
-        if self.eval_trade_both(partner, deal):
-            self.make_trade(deal)
-            self.model.history.append(deal)
-            self.update_plans(partner)
-        else:
-            self.update_plan(np.random.randint(self.model.K))
-
-    # def multi_trade(self, partner, n_offers, n_trades):
-    #     offers = []
-    #     gains = []
-    #     for o in range(n_offers):
-    #         offer = self.random_trade
-    #         if self.eval_trade_both(partner, offer):
-    #             offers.append(offer)
-    #             up = (offer["buying"]/self.ppf).sum()
-    #             down = (offer["selling"]/self.ppf).sum()
-    #             gains.append(up - down)
-    #     index = gains.argsort()
-    #     offers = offers[index]
-    #     for t in range(n_trades):
-    #         if offers.len() < 1:
-    #             pass
-    #         else:
-    #             deal = offers[t]
-    #             self.make_trade(offers[t])
-    #             offers = offers[1:]
-    #             self.model.history.append()
-    # def multi_trade(self, partner, n_trades):
-
-    def null_trade(self):
-        deal = {"buying": np.zeros(self.model.K),
-                "selling": np.zeros(self.model.K)}
-
-    def random_trade(self):
-        deal = self.null_trade()
-        buyer_gives = np.random.randint(self.model.K)
-        seller_gives = np.random.randint(self.model.K)
-        # deal["buying"][buyer_gives] = 1
-        # deal["selling"][seller_gives] = 1
-        deal["buying"][buyer_gives] = 1
-        x = self.ppf[seller_gives] / self.ppf[buyer_gives]
-        deal["selling"][seller_gives] = x * self.generosity
-        return deal
-
-    def day_trade(self, partner):
-        if partner:
-            deal = {"buying": partner.calc_production(),
-                    "selling": self.calc_production()}
-        else:
-            deal = False
-        return deal
-
-    def eval_trade(self, deal):
-        (deal["buying"]/self.ppf).sum() > (deal["selling"]/self.ppf).sum()
-
-    def eval_trade_both(self, partner, deal):
-        self.eval_trade(deal) and partner.eval_trade(reverse_trade(deal))
-
-    def compare_trades(self, deal1, deal2):
-        D1 = (deal1["buying"]/self.ppf).sum()/(deal1["selling"]/self.ppf).sum()
-        D2 = (deal2["buying"]/self.ppf).sum()/(deal2["selling"]/self.ppf).sum()
-        if D1 > D2:
-            return D1
-        else:
-            return D2
-
-    def eval_trade_old(self, deal, reverse=False):
-        """ Make sure my utility increases with a trade. """
-        if not deal:
-            return False
-        if reverse:
-            deal = self.reverse_trade(deal)
-        U1 = self.utility()
-        U2 = self.make_trade(deal).utility()
-        # I'm pretty sure I've got to fix that syntax.
-        prod_ratio = self.ppf[deal["buying"]] / self.ppf[deal["selling"]]
-        buy_ratio = deal["buying"] / deal["selling"]
-        if prod_ratio < buy_ratio:
-            U2 = 0
-        self.make_trade(self.reverse_trade(deal))
-        return U2 > U1
-
-    def make_trade(self, deal):
-        for i in deal["buying"]:
-            self.endowment[i] += deal["buying"]
-            # partner.endowment[i] -= deal["buying"]
-        for j in deal["selling"]:
-            # partner.endowment[j] += deal["selling"]
-            self.endowment[j] -= deal["selling"]
-        return self  # will this let me pipe stuff? I think it will.
-
-    def inc_plan(self, good, up=True):
-        if up:
-            self.plan[good] += 1
-        else:
-            self.plan[good] -= 1
-        return True
+        prob = self.trade_plan / self.trade_plan.sum()
+        deal = np.random.choice(range(10),
+                                1,
+                                p=prob)
+        deal = self.trades[deal]
+        good_for_goose = compare(deal, self.ppf) > 0
+        good_for_gander = compare(-deal, partner.ppf) > 0
+        if not good_for_goose or not good_for_gander:
+            deal = np.zeros(self.model.K)
+        self.model.history.append((self, partner, deal))
+        return partner, deal
 
     def calc_production(self):
         return np.multiply(self.ppf, self.plan)
@@ -234,29 +132,21 @@ class BarterAgent(Agent):
             U = U + self.endowment[i] ** self.utility_params[i]
         return U
 
-    def update_plan(self, k):
-        baseline = self.utility()
-        self.inc_plan(k)
-        # reset if this doesn't increase utility
-        if self.utility <= baseline:
-            self.inc_plan(k, False)
-            return False
-        return True
 
-    def update_plans(self, partner):
-        k1 = np.random.randint(self.model.K)
-        k2 = np.random.randint(self.model.K)
-        alt1 = BarterAgent(0, self.model)
-        alt1.inc_plan(k1)
-        if alt1.utility() > self.utility():
-            self.inc_plan(k1)
-            return True
-        alt2 = BarterAgent(0, self.model)
-        alt2.inc_plan(k2)
-        if alt2.utility() > partner.utility():
-            partner.inc_plan(k2)
-            return True
-        return False
+def utility_reporter(agent):
+    """How much utility does agent have right now?"""
+    return agent.utility()
+
+
+def specialization_reporter(agent):
+    """How much of agent's time is spent on their most popular good?"""
+    return agent.plan.max() / agent.plan.sum()
+
+
+def reverse_trade(deal):
+    new_deal = {"buying": deal["selling"],
+                "selling": deal["buying"]}
+    return new_deal
 
 
 def easy_model():
@@ -285,3 +175,8 @@ def money_model(model):
         return deal
 
     return True
+
+
+def compare(vect, basis):
+    out = vect * (basis[0] / basis)
+    out.sum()
