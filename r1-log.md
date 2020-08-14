@@ -582,3 +582,18 @@ use integers just to shrink the search space.
 
 I reduced the agent class from 20 methods to just 9. It's a lot easier to read
 now, and it saved 100 lines of code.
+
+### R1D16 - 2020-08-14 
+
+Definitely a few steps closer. Tried to actually get the model running,
+unsuccessfully. Looks like syntax issues that mean digging into documentation
+more. Fair enough; it had to happen some time.
+
+I'm 80% sure I've got the money_model() thing figured out. Just update each
+agent's list of possible trades so their trades are either positive for the 0th
+item and negative for the rest or the other way around. That's an upside of
+giving each agent an exogenous list of possible trades. It's sort of silly, but
+it does make this somewhat easier. What I need is a way for the set of
+conceivable trades to update over time. Maybe that's where the GA element will
+come in. Each generation gets better at specializing their production and across
+generations they get better at trading. 
