@@ -597,3 +597,88 @@ it does make this somewhat easier. What I need is a way for the set of
 conceivable trades to update over time. Maybe that's where the GA element will
 come in. Each generation gets better at specializing their production and across
 generations they get better at trading. 
+
+### R1D16 - 2020-08-25 
+
+Okay, summer vacation is officially over and I've got to get back in to this. 
+
+Let me start by dumping some ideas out:
+
+What I *really* want to make is a super general model of agents interacting to
+create their own emergently ordered political-economic system. But that's too
+big for right now. But thinking about such a model makes me think I like the
+idea of having a contract object. Something that takes a set of agents, some
+notion of time (i.e. as a sequence of actions and payoffs), and maps agent
+actions to outcomes. In the comparative advantage case, that's going to mean
+some agents decide to part with some of their endowments in order to get some
+part of the other agents' contributions.
+
+Okay, I built a class and a function to create a null contract. I should update
+the agent definition so their list of random trades works with these contracts
+(maybe with some sort of placeholder)... Basically I'm defining a contract as a
+list of agents and some set of exchange vectors for each agent. Eventually I
+could think of those vectors as matrices involving different commitments at
+different points in time. 
+
+The current build (should I just back it up and start from scratch again? Might
+be best to avoid confusing myself after taking a couple weeks off) gives each
+agent a list of predetermined exchanges. I'm going to comment out what's there
+and replace it with something using my contract 
+
+... on the other hand... what I left behind is simpler than what I'm thinking of
+right now. It's only one on one exchange, but I should get that running before I
+add more features. 
+
+Okay, I've got to actually read through the code I've currently got.
+
+I've got a market object that has some space, N agents, K goods, and a history
+that updates over time. Each agent will get some defined number of trades.
+
+The agents produce, trade, consume, move, and update their plans based on
+previous outcomes. The list of possible trades each agent has is fixed, meaning
+I've either got to find a way to mutate those trades over time, or create and
+mutate duplicate agents.
+
+Each round, they produce some amount (which I can modify if necessary, e.g. make
+them produce 10 days worth of output at a time). Agents with enough to sell will
+attempt to make a trade. Then each turtle consumes and moves. 
+
+Production is straight forward: just cross multiply production plans by
+production capabilities and add that vector to their endowment.
+
+Trading starts by approaching a partner. Then choose one of your pre-determined
+trades (chosen by a weighted probability based on past success). That trade will
+be a vector of numbers on the interval [-1,1] which will correspond with ...
+Scratch that! The numbers are random integers on [-3,3] which should correspond
+fairly well with the productive capacity of agents. There will be some balancing
+to make sure that the probability of a good deal corresponds with general
+productivity... i.e. if a good trade is very unlikely, trade will only determine
+something like 0.000001 of their overall wealth. And if a good trade is super
+likely, they might end up with negative endowments as they sell goods they don't
+have. 
+
+So a trade says "I'll give you x, y, and z if you give me a, b, and c," and each
+agent considers how that trade compares with autarky... eventually I want them
+to form expectations about prices, but for now it's good enough that they just
+compare to their own productivity. If the trade isn't mutually beneficial,
+nothing happens.
+
+When it comes time to consume, they look at their cobb douglas utility function
+and consume integer quantities from their endowment (never consuming something
+they don't have) drawn with utility-weighted probability.
+
+The movement functionality is a bit unnecessary right now. I want to have some
+movement at some point (and let them navigate a tradeoff between exploring the
+world and staying in one place to produce more). But I'm going to ignore it for
+now. 
+
+A good trade will lead to production plans moving in the direction of
+comparative advantage implied by that trade. i.e. make less of the things I buy
+and more of the things I sell. A good trade also becomes more likely to be tried
+again in the future (e.g. with other agents.)
+
+Essentially I've got agents learning what sorts of trades to make, and what to produce.
+
+Okay, I feel pretty good with what I've got. I see lots of ways forward, but
+none I *need* to make now. I think what I've got to do is get it running and
+spitting out data.

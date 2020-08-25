@@ -6,6 +6,34 @@ from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
 
+# def null_contract(agents):
+#     model = agents[0].model
+#     exchanges = [np.zeros(model.K) for a in agents]
+#     C = Contract(agents, exchanges, model)
+#     return C
+
+
+# class Contract():
+#     """A contract mapping actions to payoffs for some agents"""
+#     def __init__(self, agents, exchanges, model):
+#         self.model = model
+#         self.agents = agents
+#         self.exchanges = exchanges
+
+#     def mutate_contract(self, mutation="noise", noise_factor=1, donor=None):
+#         """Given a contract, mutate it in some way."""
+#         change = np.zeros(size=self.exchanges.size)
+#         if mutation == "noise":
+#             change = np.random.randn(size=self.exchanges.size,
+#                                      mean=0, sd=noise_factor)
+#         if mutation == "cross" and donor is not None:
+#             for g in self.model.trades:
+#                 if np.random.rand() > 0.5:
+#                     change[g] = donor.trades[g]
+#         self.exchanges += change
+#         return self
+
+
 class Market(Model):
     """An economy with N agents and K goods"""
     def __init__(self, N, K, width=1, height=1):
@@ -67,7 +95,7 @@ class BarterAgent(Agent):
             self.produce()
         else:
             self.trade()
-        self.consume()
+        self.consume(1)
         self.move()
 
     def produce(self, factor=1):
@@ -81,14 +109,14 @@ class BarterAgent(Agent):
         """Find a partner and try to make a deal."""
         partner = self.find_partner()
         prob = self.trade_plan / self.trade_plan.sum()
-        dealnum = np.random.choice(range(10),
+        dealnum = np.random.choice(range(self.model.trades),
                                    1,
                                    p=prob)
         deal = self.trades[dealnum]
         good_for_goose = compare(deal, self.ppf) > 0
         good_for_gander = compare(-deal, partner.ppf) > 0
         if not good_for_goose or not good_for_gander:
-            deal = np.zeros(self.model.K)
+            return self
         else:
             self.model.history.append((self.unique_id,
                                        partner.unique_id,
@@ -129,7 +157,7 @@ class BarterAgent(Agent):
     def update(self, deal):
         """Update production plans in light of this deal"""
         update = self.learning_rate * deal
-        self.plan += update
+        self.plan -= update  # pretty sure that should be negative...
         self.plan[self.plan < 0] = 0.01
         return self
 
