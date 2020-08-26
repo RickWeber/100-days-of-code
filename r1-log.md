@@ -686,3 +686,10 @@ spitting out data.
 ### R1D17 - 2020-08-26 
 
 Alright, I want to put in a main() function...
+
+I've done some tidying in the model. Made at least one section of 3 lines into
+just 1 line. It's back down to 180 lines of code, and I think it's pretty much
+just what I need left in there. I've been getting errors on the repl though.
+It's having trouble with something calling len() which I think I've eliminated.
+But It's still showing up. I'll restart the REPL and try again tomorrow. But now
+it's time to take Lola to the store. 

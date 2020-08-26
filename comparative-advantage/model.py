@@ -161,24 +161,6 @@ def specialization_reporter(agent):
     return agent.plan.max() / agent.plan.sum()
 
 
-def money_model(model):
-    """Modify the model so good 0 is fixed, contributes nothing to the agents'
-    utility, and is used to buy other goods (no barter)."""
-    model.schedule.agents.ppf[0] = 0
-    model.schedule.agents.endowment[0] = 1000
-    model.schedule.agents.util_params[0] = 0
-    # trade only occurs via good 0
-    for i in model.schedule.agents:
-        i.trades = i.trades.abs()
-        # I'm pretty sure I need to tune the random numbers
-        # to match endowment size. 10 should vary with model.something
-        i.trades[:, 0] = np.random.randint(10, size=(model.trades, 1))
-        buys = np.random.rand(model.trades) - 0.5 < 0
-        i.trades[buys, 1:] *= -1
-        i.trades[not buys, 0] *= -1
-    return model
-
-
 def compare(vect, basis):
     """Compare a vector to some basis. Used to map a deal and an agent's ppf
     to a real number. If that number is positive, it means they come out ahead
@@ -188,7 +170,7 @@ def compare(vect, basis):
 
 
 def main():
-    model = Market(2, 2, 1, 1)
+    model = Market(2, 2)
     agent1 = model.schedule.agents[0]
     agent2 = model.schedule.agents[1]
     agent1.u_params = np.array([1/2, 1/2])
