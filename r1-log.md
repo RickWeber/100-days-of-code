@@ -682,3 +682,7 @@ Essentially I've got agents learning what sorts of trades to make, and what to p
 Okay, I feel pretty good with what I've got. I see lots of ways forward, but
 none I *need* to make now. I think what I've got to do is get it running and
 spitting out data.
+
+### R1D17 - 2020-08-26 
+
+Alright, I want to put in a main() function...

@@ -2,7 +2,7 @@
 import numpy as np
 from mesa import Agent, Model
 from mesa.time import RandomActivation
-from mesa.space import MultiGrid
+# from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
 
@@ -36,28 +36,25 @@ from mesa.datacollection import DataCollector
 
 class Market(Model):
     """An economy with N agents and K goods"""
-    def __init__(self, N, K, width=1, height=1):
+    def __init__(self, N, K):  # , width=1, height=1):
         super().__init__()
         self.N = N
         self.K = K
-        self.grid = MultiGrid(width, height, True)
+        # self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
         self.running = True  # for BatchRunner()
         self.agent_productivity = K * 3
         self.allow_trade = True
         self.history = []
-        self.trades = 10
+        self.trades_undertaken = 0
+        self.trades = 50
         # create agents
         for i in range(N):
             a = BarterAgent(i, self)
             self.schedule.add(a)
-            x = self.random.randrange(self.grid.width)
-            y = self.random.randrange(self.grid.height)
-            self.grid.place_agent(a, (x, y))
         # collect data
         self.datacollector = DataCollector(
-            # Not sure why this is giving me problems...
-            model_reporters={"Number of trades": self.history.len()},
+            model_reporters={"Number of trades": self.trades_undertaken},
             agent_reporters={"Utility": utility_reporter,
                              "Specialization": specialization_reporter}
         )
@@ -78,15 +75,9 @@ class BarterAgent(Agent):
         self.endowment = np.ones(model.K) * 3
         u_params = np.random.randint(4, size=model.K) + 1
         self.u_params = u_params / u_params.sum()
-        self.generosity = np.random.normal(0.95, 0.025)
-        # self.generosity = np.random.rand(0.95, 1)
-        self.memory = np.zeros(model.K)
+        # self.memory = np.zeros(model.K)  # might be something here...
         self.learning_rate = 0.05
-        # Something here is acting like a tuple...
-        sell = np.random.rand(model.trades, model.K) - 0.5 < 0
-        self.trades = np.random.randint(3, size=(model.trades, model.K))
-        self.trades[sell] *= -1
-        self.trade_plan = np.ones(model.trades)
+        self.trades = np.random.randint(-3, 3, size=(model.trades, model.K))
 
     def step(self):
         """What happens each time step"""
@@ -96,7 +87,6 @@ class BarterAgent(Agent):
         else:
             self.trade()
         self.consume(1)
-        self.move()
 
     def produce(self, factor=1):
         """Produce based on production plan"""
@@ -142,18 +132,6 @@ class BarterAgent(Agent):
             self.endowment[good] -= 1
         return self
 
-    def move(self):
-        """Move to an adjacent grid cell"""
-        possible_moves = self.model.grid.get_neighborhood(
-            self.pos,
-            moore=True,
-            include_center=False)
-        if possible_moves.len() < 1:
-            return False
-        new_position = self.random.choice(possible_moves)
-        self.model.grid.move_agent(self, new_position)
-        return True
-
     def update(self, deal):
         """Update production plans in light of this deal"""
         update = self.learning_rate * deal
@@ -163,15 +141,9 @@ class BarterAgent(Agent):
 
     def find_partner(self):
         """Choose another agent unless nobody is close enough."""
-        if self.model.grid.width + self.model.grid.height < 10:
-            prtnr = self.model.schedule.agents[np.random.randint(self.model.N)]
-            if prtnr == self:
-                prtnr = self.find_partner()
-        else:
-            cellmates = self.model.grid.get_cell_list_contents([self.pos])
-            if len(cellmates) < 1:
-                return self
-            prtnr = self.random.choice(cellmates)
+        prtnr = self.model.schedule.agents[np.random.randint(self.model.N)]
+        if prtnr == self:
+            prtnr = self.find_partner()
         return prtnr
 
     def utility(self):
@@ -189,22 +161,6 @@ def specialization_reporter(agent):
     return agent.plan.max() / agent.plan.sum()
 
 
-def reverse_trade(deal):
-    new_deal = {"buying": deal["selling"],
-                "selling": deal["buying"]}
-    return new_deal
-
-
-def easy_model(N=2):
-    model = Market(N, N, 1, 1)
-    for i in range(N):
-        A = model.schedule.agents[i]
-        A.u_params = np.divide(np.ones(N), N)
-        A.ppf = np.ones(N)
-        A.ppf[i] = 4
-    return model
-
-
 def money_model(model):
     """Modify the model so good 0 is fixed, contributes nothing to the agents'
     utility, and is used to buy other goods (no barter)."""
@@ -214,13 +170,12 @@ def money_model(model):
     # trade only occurs via good 0
     for i in model.schedule.agents:
         i.trades = i.trades.abs()
-        buys = np.random.rand(model.trades) - 0.5 < 0
         # I'm pretty sure I need to tune the random numbers
-        # to match endowment size.
-        i.trades[buys, 0] = np.random.randint(3, size=(model.trades, 1))
-        i.trades[buys, 1:] = np.zeros((model.trades, model.K-1))
-        i.trades[not buys, 0] = np.zeros((model.trades, 1))
-        i.trades[not buys, 1:] = np.random.randint(3, (model.trades, model.K-1))
+        # to match endowment size. 10 should vary with model.something
+        i.trades[:, 0] = np.random.randint(10, size=(model.trades, 1))
+        buys = np.random.rand(model.trades) - 0.5 < 0
+        i.trades[buys, 1:] *= -1
+        i.trades[not buys, 0] *= -1
     return model
 
 
@@ -230,3 +185,21 @@ def compare(vect, basis):
     on the deal relative to no ability to trade."""
     out = vect * (basis[0] / basis)
     out.sum()
+
+
+def main():
+    model = Market(2, 2, 1, 1)
+    agent1 = model.schedule.agents[0]
+    agent2 = model.schedule.agents[1]
+    agent1.u_params = np.array([1/2, 1/2])
+    agent2.u_params = np.array([1/2, 1/2])
+    agent1.ppf = np.array([4, 1])
+    agent2.ppf = np.array([1, 4])
+    return model
+
+
+if __name__ == "__main__":
+    model = main()
+
+if __name__ == "model":
+    simple_model = main()
