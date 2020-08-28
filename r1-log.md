@@ -693,3 +693,56 @@ just what I need left in there. I've been getting errors on the repl though.
 It's having trouble with something calling len() which I think I've eliminated.
 But It's still showing up. I'll restart the REPL and try again tomorrow. But now
 it's time to take Lola to the store. 
+
+### R1D18 - 2020-08-27 
+
+Just got out of class. In office hours now. We'll see how well I can stream and
+code at the same time.
+
+Okay, I'm getting new errors! That means I'm solving the old ones. I'm looking
+at the agents' list of possible trades and realizing a) I'm getting a lot of
+trades where all elements are negative, and b) I could probably just create a
+list of all possible trades rather than randomizing. At least for small values
+of K. 
+
+### R1D19 - 2020-08-28
+
+Having a hard time pulling myself into the work. But I'm going to at least show
+up and make an entry. Inch by inch I'll at least establish showing up then build
+on that. 
+
+So I imported the model, and the error it gave me on mod.step() was from the
+consume() method. Here's what I want: consume integer quantities of goods where
+the probability of consuming one at any given time is weighted by their marginal
+impact on the agents' utility. 
+
+I'm not totally on board with saying "consume x units" now that I think of it
+though. But whatever. Right now it's a constant amount that's the same for all
+agents so it should be fine. I can think about that problem later. 
+
+Okay, I'm fixing the problem with np.random.choice not liking my use of range().
+It feels like it should work, but maybe I need to use pandas too? This
+particular block of code would be much easier in R. But I'll make do with a
+hacky solution for the time being. A loop over a range to turn it into a list.
+There should be a better way. But I don't need it right now.
+
+Here's where I'm stuck...
+Around line 131, I'm looking at an agent's endowment ...
+never mind. I think I fixed it!
+
+And I got an idea for introducing time into the model... an agent could forgo
+consumption now and get discounted utility from a future round by having us
+redefine their utility method to be 0.95 of its former self. I'm not sure if
+that would be a useful way to go about it. There's probably a simpler method.
+But, just by starting to write about my problem I saw the solution and
+apparently fixed it. 
+
+Never mind. It's still broken.
+
+Here's what I'm after: make sure the agent has enough to consume in their
+endowment, then subtract goods from their endowment. I'm having trouble with
+converting the endowment vector, apparently. 
+
+I keep throwing myself at this and I keep coming up short. I'll have to pick at
+it later with the python documentation at hand. 
+

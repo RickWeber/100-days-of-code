@@ -54,7 +54,7 @@ class Market(Model):
             self.schedule.add(a)
         # collect data
         self.datacollector = DataCollector(
-            model_reporters={"Number of trades": self.trades_undertaken},
+            model_reporters={"Number of trades": "self.trades_undertaken"},
             agent_reporters={"Utility": utility_reporter,
                              "Specialization": specialization_reporter}
         )
@@ -72,12 +72,13 @@ class BarterAgent(Agent):
         self.ppf = np.ones(model.K)
         for i in range(model.agent_productivity - model.K):
             self.ppf[np.random.randint(model.K)] += 1
-        self.endowment = np.ones(model.K) * 3
+        self.endowment = np.ones(model.K) * 10
         u_params = np.random.randint(4, size=model.K) + 1
         self.u_params = u_params / u_params.sum()
         # self.memory = np.zeros(model.K)  # might be something here...
         self.learning_rate = 0.05
         self.trades = np.random.randint(-3, 3, size=(model.trades, model.K))
+        self.trade_plan = np.ones(model.trades)
 
     def step(self):
         """What happens each time step"""
@@ -102,6 +103,7 @@ class BarterAgent(Agent):
         dealnum = np.random.choice(range(self.model.trades),
                                    1,
                                    p=prob)
+        print(dealnum)  # make sure this code is working properly.
         deal = self.trades[dealnum]
         good_for_goose = compare(deal, self.ppf) > 0
         good_for_gander = compare(-deal, partner.ppf) > 0
@@ -120,16 +122,19 @@ class BarterAgent(Agent):
 
     def consume(self, ratio=1):
         """Use up goods based on weighted probability"""
-        params = self.u_params
-        consumption = self.model.agent_productivity
-        consumption = int(consumption * ratio)
-        for i in range(consumption):
-            have_enough = self.endowment > 0
-            prob = params[have_enough] / sum(params[have_enough])
-            good = np.random.choice(range(self.model.K)[have_enough],
-                                    1,
-                                    p=prob)
-            self.endowment[good] -= 1
+        # consumption = self.model.agent_productivity
+        # consumption = int(consumption * ratio)
+        # print(consumption)
+        consumption = 5
+        if self.endowment.min() < consumption:
+            return self
+        probs = self.u_params  # / self.u_params.sum()
+        eat = np.random.choice(range(self.model.K),
+                               size=consumption,
+                               replace=True,
+                               p=probs)
+        for e in eat:
+            self.endowment[e] -= 1
         return self
 
     def update(self, deal):
@@ -166,7 +171,7 @@ def compare(vect, basis):
     to a real number. If that number is positive, it means they come out ahead
     on the deal relative to no ability to trade."""
     out = vect * (basis[0] / basis)
-    out.sum()
+    return out.sum()  # check this.
 
 
 def main():
