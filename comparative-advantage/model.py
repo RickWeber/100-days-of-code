@@ -1,56 +1,32 @@
 # Libraries
 import numpy as np
-from mesa import Agent, Model
+import pandas as pd
+from mesa import Model
 from mesa.time import RandomActivation
-# from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
-
-
-# def null_contract(agents):
-#     model = agents[0].model
-#     exchanges = [np.zeros(model.K) for a in agents]
-#     C = Contract(agents, exchanges, model)
-#     return C
-
-
-# class Contract():
-#     """A contract mapping actions to payoffs for some agents"""
-#     def __init__(self, agents, exchanges, model):
-#         self.model = model
-#         self.agents = agents
-#         self.exchanges = exchanges
-
-#     def mutate_contract(self, mutation="noise", noise_factor=1, donor=None):
-#         """Given a contract, mutate it in some way."""
-#         change = np.zeros(size=self.exchanges.size)
-#         if mutation == "noise":
-#             change = np.random.randn(size=self.exchanges.size,
-#                                      mean=0, sd=noise_factor)
-#         if mutation == "cross" and donor is not None:
-#             for g in self.model.trades:
-#                 if np.random.rand() > 0.5:
-#                     change[g] = donor.trades[g]
-#         self.exchanges += change
-#         return self
+from agents import BarterAgent
 
 
 class Market(Model):
     """An economy with N agents and K goods"""
     def __init__(self, N, K):  # , width=1, height=1):
         super().__init__()
-        self.N = N
-        self.K = K
-        # self.grid = MultiGrid(width, height, True)
+        self.N = N  # number of agents
+        self.K = K  # number of goods
         self.schedule = RandomActivation(self)
-        self.running = True  # for BatchRunner()
-        self.agent_productivity = K * 3
         self.allow_trade = True
-        self.history = []
+        self.history = pd.DataFrame({
+            "partner1": [],
+            "partner2": [],
+            "deal": [],
+            "trades": []
+        })
         self.trades_undertaken = 0
-        self.trades = 50
+        poss_trades = [(x, y) for x in range(K) for y in range(K) if x != y]
+        self.possible_trades = np.array(poss_trades)
         # create agents
         for i in range(N):
-            a = BarterAgent(i, self)
+            a = BarterAgent(self.next_id(), self)
             self.schedule.add(a)
         # collect data
         self.datacollector = DataCollector(
@@ -63,97 +39,18 @@ class Market(Model):
         self.datacollector.collect(self)
         self.schedule.step()
 
-
-class BarterAgent(Agent):
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
-        self.model = model
-        self.plan = np.ones(model.K)
-        self.ppf = np.ones(model.K)
-        for i in range(model.agent_productivity - model.K):
-            self.ppf[np.random.randint(model.K)] += 1
-        self.endowment = np.ones(model.K) * 10
-        u_params = np.random.randint(4, size=model.K) + 1
-        self.u_params = u_params / u_params.sum()
-        # self.memory = np.zeros(model.K)  # might be something here...
-        self.learning_rate = 0.05
-        self.trades = np.random.randint(-3, 3, size=(model.trades, model.K))
-        self.trade_plan = np.ones(model.trades)
-
-    def step(self):
-        """What happens each time step"""
-        self.produce(2)
-        if sum(self.endowment > 0) < self.model.K:
-            self.produce()
-        else:
-            self.trade()
-        self.consume(1)
-
-    def produce(self, factor=1):
-        """Produce based on production plan"""
-        prod = np.multiply(self.plan, self.ppf)
-        prod = np.multiply(prod, factor)
-        self.endowment += prod
-        return self
-
-    def trade(self):
-        """Find a partner and try to make a deal."""
-        partner = self.find_partner()
-        prob = self.trade_plan / self.trade_plan.sum()
-        dealnum = np.random.choice(range(self.model.trades),
-                                   1,
-                                   p=prob)
-        print(dealnum)  # make sure this code is working properly.
-        deal = self.trades[dealnum]
-        good_for_goose = compare(deal, self.ppf) > 0
-        good_for_gander = compare(-deal, partner.ppf) > 0
-        if not good_for_goose or not good_for_gander:
-            return self
-        else:
-            self.model.history.append((self.unique_id,
-                                       partner.unique_id,
-                                       deal))
-            self.endowment += deal
-            partner.endowment -= deal
-            self.update(deal)
-            partner.update(-deal)
-            self.trade_plan[dealnum] += 1
-        return self
-
-    def consume(self, ratio=1):
-        """Use up goods based on weighted probability"""
-        # consumption = self.model.agent_productivity
-        # consumption = int(consumption * ratio)
-        # print(consumption)
-        consumption = 5
-        if self.endowment.min() < consumption:
-            return self
-        probs = self.u_params  # / self.u_params.sum()
-        eat = np.random.choice(range(self.model.K),
-                               size=consumption,
-                               replace=True,
-                               p=probs)
-        for e in eat:
-            self.endowment[e] -= 1
-        return self
-
-    def update(self, deal):
-        """Update production plans in light of this deal"""
-        update = self.learning_rate * deal
-        self.plan -= update  # pretty sure that should be negative...
-        self.plan[self.plan < 0] = 0.01
-        return self
-
-    def find_partner(self):
-        """Choose another agent unless nobody is close enough."""
-        prtnr = self.model.schedule.agents[np.random.randint(self.model.N)]
-        if prtnr == self:
-            prtnr = self.find_partner()
-        return prtnr
-
-    def utility(self):
-        """Calculate utility based on endowment and Cobb-Douglas preferences"""
-        (self.endowment ** self.u_params).sum()
+    def flip_trade(self, trade_idx):
+        """
+        Given a trade, return the version corresponding to what
+        your trading partner experiences.
+        e.g. turn 'buy coconuts, sell fish' into 'buy fish, sell coconuts'
+        """
+        trade = self.possible_trades[trade_idx]
+        g0 = trade[0]
+        g1 = trade[1]
+        newTrade = np.array([g1, g0])
+        newTrade_idx = self.possible_trades[newTrade]  # make this work.
+        return newTrade_idx
 
 
 def utility_reporter(agent):
@@ -163,7 +60,7 @@ def utility_reporter(agent):
 
 def specialization_reporter(agent):
     """How much of agent's time is spent on their most popular good?"""
-    return agent.plan.max() / agent.plan.sum()
+    return agent.prod_plan.max() / agent.prod_plan.sum()
 
 
 def compare(vect, basis):
@@ -176,12 +73,12 @@ def compare(vect, basis):
 
 def main():
     model = Market(2, 2)
-    agent1 = model.schedule.agents[0]
-    agent2 = model.schedule.agents[1]
+    agent0 = model.schedule.agents[0]
+    agent1 = model.schedule.agents[1]
+    agent0.u_params = np.array([1/2, 1/2])
     agent1.u_params = np.array([1/2, 1/2])
-    agent2.u_params = np.array([1/2, 1/2])
-    agent1.ppf = np.array([4, 1])
-    agent2.ppf = np.array([1, 4])
+    agent0.ppf = np.array([4, 1])
+    agent1.ppf = np.array([1, 4])
     return model
 
 

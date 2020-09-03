@@ -746,3 +746,66 @@ converting the endowment vector, apparently.
 I keep throwing myself at this and I keep coming up short. I'll have to pick at
 it later with the python documentation at hand. 
 
+
+### R1D20 - 2020-08-31
+
+Did I miss the whole weekend? I'm going to have to figure out a schedule that
+works this semester.
+
+Alright, last time I was able to create an instance of the model in the REPL but
+was having problems stepping the model forward. Let me start by writing some
+convenience functions.
+
+caught a bug in the produce() method. Uncaught it would have meant more and more
+production over time. But for some reason it's not importing properly... I'll
+have to check this later.
+
+### R1D21 - 2020-09-01
+
+I'm going to split up the model.py file. I'm looking at the mesa example for the
+wolf sheep model and they do it that way. I think that'll make it easier to organize.
+
+Okay, I'm rebuilding the BarterAgent class and tearing things up.
+
+I'm going to leave it in a bit of a mess while I get ready for class. I'll have
+to read through it and explain everything that's there later on.
+
+### R1D22 - 2020-09-02
+
+Current status:
+
+I've got two scripts I'm working on (and I really should put some of the other
+stuff, like helper functions, into another script... but I'm not going to do
+that yet): agents.py and model.py.
+
+Model sets up the market class and some of the helper functions. Agents sets up
+the BarterAgent class
+
+
+The market holds on to a list of all possible two good trades (e.g. fish for
+coconuts, beer for pizza, pizza for beer, etc.). 
+Agents learn which trades work well for them (e.g. no point in buying fish if
+you have comparative advantage in fish).
+In evaluating any given trade, agents know what the maximum price per unit is
+based on their ppf.
+
+Went through most of the code. 
+
+To check on next:
+* around line 89 of agents.py and updating agents' plans.
+
+### R1D23 - 2020-09-03
+
+Okay, the thing to worry about right now is updating plans. But let me start by
+learning a bit more about pandas. 
+
+Okay, I like the look of pandas. I should use it to hold onto the trades
+variable that's local to the trade() method. 
+
+I also need to flip the direction of trades when updating the partner's history.
+I've got histories stored at agent and market levels in pandas dataframes. I
+like that. It will make it easier to limit memory and also to calculate things
+from the memory. I should build explicit methods for having agents access the
+market's history, maybe let them sample from the history to form imperfect
+expectations about prices. But not today. Today I just want to make sure I'm
+updating histories correctly. Then I've got to make sure the model runs.
