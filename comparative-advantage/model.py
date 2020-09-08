@@ -1,56 +1,6 @@
 # Libraries
 import numpy as np
-import pandas as pd
-from mesa import Model
-from mesa.time import RandomActivation
-from mesa.datacollection import DataCollector
-from agents import BarterAgent
-
-
-class Market(Model):
-    """An economy with N agents and K goods"""
-    def __init__(self, N, K):  # , width=1, height=1):
-        super().__init__()
-        self.N = N  # number of agents
-        self.K = K  # number of goods
-        self.schedule = RandomActivation(self)
-        self.allow_trade = True
-        self.history = pd.DataFrame({
-            "partner1": [],
-            "partner2": [],
-            "deal": [],
-            "trades": []
-        })
-        self.trades_undertaken = 0
-        poss_trades = [(x, y) for x in range(K) for y in range(K) if x != y]
-        self.possible_trades = np.array(poss_trades)
-        # create agents
-        for i in range(N):
-            a = BarterAgent(self.next_id(), self)
-            self.schedule.add(a)
-        # collect data
-        self.datacollector = DataCollector(
-            model_reporters={"Number of trades": "self.trades_undertaken"},
-            agent_reporters={"Utility": utility_reporter,
-                             "Specialization": specialization_reporter}
-        )
-
-    def step(self):
-        self.datacollector.collect(self)
-        self.schedule.step()
-
-    def flip_trade(self, trade_idx):
-        """
-        Given a trade, return the version corresponding to what
-        your trading partner experiences.
-        e.g. turn 'buy coconuts, sell fish' into 'buy fish, sell coconuts'
-        """
-        trade = self.possible_trades[trade_idx]
-        g0 = trade[0]
-        g1 = trade[1]
-        newTrade = np.array([g1, g0])
-        newTrade_idx = self.possible_trades[newTrade]  # make this work.
-        return newTrade_idx
+from market import Market
 
 
 def utility_reporter(agent):

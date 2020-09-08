@@ -809,3 +809,29 @@ from the memory. I should build explicit methods for having agents access the
 market's history, maybe let them sample from the history to form imperfect
 expectations about prices. But not today. Today I just want to make sure I'm
 updating histories correctly. Then I've got to make sure the model runs.
+
+### R1D24 - 2020-09-04
+
+I've tidied up some code and got agents and market taking better advantage of
+pandas. I'm also wrapping my head around pandas... it's sort of like the
+tidyverse but without piping. Or, I guess, piping takes the form of tacking
+methods on to a statement.
+
+I think I've got agents.py where I want it. I've got to get it spitting out data
+and make sure it operates, but I can do that another time. I'm pretty happy with
+what I've got right now. I'll have to double check line 143 almost certainly.
+But otherwise I should have a viable model with agents moving towards their
+comparative advantage when they trade and getting more utility out of the deal
+
+### R1D25 - 2020-09-08
+
+Fell off the wagon for labor day weekend. Let's get back to it...
+
+I think it's time to create a separate repository for the project. This repo
+will hold old versions plus this journal, but a) I want to share the model
+separately from 100 Days pretty soon, and b) I should probably just retype the
+whole thing to wrap my head around it again.
+
+Alright, did a lot of copying which allowed a decent amount of tidying up. I
+should really order a copy of Pragmatic Programmer and get a better idea of how
+to do this stuff. In any case, I put in the time for the day! So that's a win. 
