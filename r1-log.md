@@ -835,3 +835,19 @@ whole thing to wrap my head around it again.
 Alright, did a lot of copying which allowed a decent amount of tidying up. I
 should really order a copy of Pragmatic Programmer and get a better idea of how
 to do this stuff. In any case, I put in the time for the day! So that's a win. 
+
+
+### R1D26 - 2020-09-09
+
+Okay, I've built in some functionality for reproduction and mutation. What I've
+really got to do is figure out how to put the whole thing together in a way
+that's easy to let it run and see what data it spits out.
+
+### R1D27 - 2020-09-10
+
+Finally pulling the code into the REPL and finding problems with my pandas work.
+Ugh. I'd better go get more coffee.
+
+I've been bashing my head against this to no avail. It keeps having a problem
+with initiating agents. Maybe I'll root around with the REPL open and rebuild
+this afternoon.
