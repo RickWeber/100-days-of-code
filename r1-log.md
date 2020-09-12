@@ -851,3 +851,17 @@ Ugh. I'd better go get more coffee.
 I've been bashing my head against this to no avail. It keeps having a problem
 with initiating agents. Maybe I'll root around with the REPL open and rebuild
 this afternoon.
+
+### R1D27 - 2020-09-11
+
+Opened it up, got distracted, felt overwhelmed, and walked away. But since I'm
+here now, let me set myself up for success next time...
+
+I think I've got to strip it down to the bare essentials. Start with a blank
+file and build in the minimal mechanics of this model.
+
+### R1D28 - 2020-09-12
+
+Okay, at least for now I've copied all my code into working_file.py. That should
+reduce my confusion with imports. I've done a bit of fiddling, but mostly I'm
+just setting it up for now. Time to go get some breakfast first.
