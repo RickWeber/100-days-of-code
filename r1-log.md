@@ -865,3 +865,10 @@ file and build in the minimal mechanics of this model.
 Okay, at least for now I've copied all my code into working_file.py. That should
 reduce my confusion with imports. I've done a bit of fiddling, but mostly I'm
 just setting it up for now. Time to go get some breakfast first.
+
+### R1D29 - 2020-09-14
+
+Tidying up some code. From now on, history will be stored by the Market and
+Agents will look it up instead of keeping their own record.
+
+Part of me wants to make exchanges their own class, but it's probably too early.
