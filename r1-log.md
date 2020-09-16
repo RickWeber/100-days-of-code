@@ -872,3 +872,19 @@ Tidying up some code. From now on, history will be stored by the Market and
 Agents will look it up instead of keeping their own record.
 
 Part of me wants to make exchanges their own class, but it's probably too early.
+
+### R1D30 - 2020-09-16
+
+Back on the wagon! The conference is happening soon so I've got to get this
+running ASAP so I can put together a presentation.
+
+Finally solved that pd renaming problem! It turns out '0' != 0
+
+At some point recently I was thinking about price vectors and updating them by
+exponential moving average.... Just want to record that somewhere....
+
+I'm cleaning up a bunch of pandas stuff. Getting more comfortable. I'm realizing
+how much I've been spoiled by R's dataframes and tibbles.
+
+In any case, I got some work done, cleaned some stuff up, and it should be that
+much closer to functioning when I get back to it.
