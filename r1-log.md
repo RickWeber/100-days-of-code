@@ -888,3 +888,162 @@ how much I've been spoiled by R's dataframes and tibbles.
 
 In any case, I got some work done, cleaned some stuff up, and it should be that
 much closer to functioning when I get back to it.
+
+### R1D31 - 2020-09-18
+
+Another missed day. I've got to make it a priority to get on this in the
+mornings. Especially while I've got this deadline looming. 
+
+Okay, I'm taking yet another swing at simplifying. What I've got to figure out
+is the utility thing. I've got to clear their endowment out every once in a
+while. Not every tick, but maybe every 10 (or 100). What I really want to do is
+have them report utility so I can watch the distribution move right as they
+refine their production plans in the direction of their comparative advantage.
+
+Stuff I need TODO:
+* double check this delta = give/take stuff
+   * as it is it sort of pushes them in the direction of CA, which is probably
+     fine for now. But I sort of feel like it's assuming the outcome. 
+     * Perhaps I need a) the possibility of eliminating trade or updating
+       production plans, or b) a different way to mutate behavior.
+
+In any case, I feel surprisingly good about this.
+
+### R1D32 - 2020-09-19
+
+Keeping the streak alive!
+
+Looking around line 30, I've got two agents trading a day's production, but
+there's no guarantee that both partners gain from trade. The midpoint of the ppf
+should do the trick if all agents' ppfs sum to the same production level.
+Preferences might make some goods more valuable, but it's otherwise fine. 
+
+So I could do (at least) two things:
+
+1. Compare a model where they blindly trade to one where they blindly don't.
+2. Let agents veto trades and expect longer convergence to the efficient outcome.
+
+I also still haven't built a way for non-trading agents to update production
+based on their utility function alone.
+
+In any case, what I really want to do for updating production isn't give/take.
+It's give minus take! That alone makes this a successful coding session even if
+it's a short one.
+
+Also, I forgot to have the mkt class create the agents!
+
+
+### R1D33 - 2020-09-21
+Okay, I at least touched the code. I updated the doc string for the trade
+method. Right now I'm just going to have them trade a day's production for a
+day's production. There's no guarantee that it's mutually beneficial, but the
+expected value of each agent's PPF is a vector of the same magnitude so it
+should be fine for now. I can make the model more complex in the future.
+
+### R1D34 - 2020-09-23
+I'm touching the code. Can't promise much more than that, but I've got to have
+some sort of forward momentum.
+
+At the very least, I made learning rate an agent variable. 
+
+### R1D35 - 2020-09-24
+
+Okay, I'm doing a Pandas course on Datacamp. 
+
+The current version doesn't have a history. Do I want to build that back in? I
+think I've got a good enough sense of Pandas to get it in pretty smoothly. 
+
+
+### R1D36 - 2020-09-25
+
+Alright, I'm trying to pull this into the repl but I'm getting a weird error. In
+the model init it's saying "arry() missing required argument 'object' (pos 1)"
+when I run the easy_model() function to create a simple 2x2.
+
+In [43]: mod = M.easy_model()
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-43-a8e222e1911e> in <module>
+----> 1 mod = M.easy_model()
+
+~/Programs/comparative_advantage/working_file.py in easy_model()
+
+~/Programs/comparative_advantage/working_file.py in __init__(self, N, K)
+    143 #     out = vect * (basis[0] / basis)
+    144 #     return out.sum()  # check this.
+--> 145 
+    146 
+    147 def easy_model():
+
+~/Programs/comparative_advantage/working_file.py in __init__(self, unique_id, model)
+
+TypeError: array() missing required argument 'object' (pos 1)
+
+In [44]: 
+
+The relevant init is way up on line 16. So why is it missing something? I
+deleted some functions that I don't need. Now it's not giving a line, but it
+looks like the problem is in the agent class. I'm not seeing anything wrong with
+any of my np calls.
+
+I think I should go back and work through a mesa tutorial...
+
+
+### R1D37 - 2020-09-26
+
+Playing around with the idea of creating an explicit class for exchanges. The
+simplest type of exchange is just a transfer of a vector of goods from one agent
+to another. An exchange is just two of these with the partners changing places
+between each transfer. 
+
+I can use an exchange class method to make a random exchange or do an exchange
+that's in the model's history.
+
+``` python
+class transfer(exchange):
+    def __init__(self, sender, recipient, goods)
+        super().__init__()
+        self.model = sender.model
+        self.sender = sender
+        self.recipient = recipient
+        self.goods = goods
+        
+    def undertake(self):
+        self.recipient.endowment += self.goods
+        self.sender.endowment -= self.goods
+
+class exchange():
+    def __init__(self, p1, p2, g1, g2, model):
+        self.p1 = p1
+        self.p2 = p2
+        self.g1 = g1
+        self.g2 = g2
+        self.model = model
+    
+    def rand_exchange(self):
+        if self.model.money:
+            goods1 = np.zeros(self.model.K)
+            goods1[0] = 1
+            goods2 = np.random.choice(range(1,self.model.K))
+        else:
+            goods1 = self.random_goods()
+            goods2 = self.random_goods()
+        return exchange(p1, p2, goods1, goods2, self.model)
+    
+    def null_exchange(self, p1, p2)
+    
+class ant():
+...
+    def rand_historical_trade(self, own=True):
+        history = self.model.history
+        if own:
+            keep = history["p1"] == self or history["p2"] == self
+            history = history[keep]
+        return np.random.choice(history)
+...
+```
+
+There's some tidying to do in there, but basically the class would be a place to
+create and undertake exchanges. By building together transfers I can make
+exchanges of arbitrary complexity. I could even have agents ask other agents to
+make transfers to third agents (or from?)
