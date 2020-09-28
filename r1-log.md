@@ -1047,3 +1047,17 @@ There's some tidying to do in there, but basically the class would be a place to
 create and undertake exchanges. By building together transfers I can make
 exchanges of arbitrary complexity. I could even have agents ask other agents to
 make transfers to third agents (or from?)
+
+### R1D38 - 2020-09-28
+
+I think I did a bit yesterday, but whatever. No record, I'll treat today as the
+next day.
+
+So I've finally got it in the repl. I think I've got the model basically where I
+want it. I want to add visualization for the conference (and to make it easy to
+start and re-run while displaying data). But right now I'm running into casting
+problems with np.
+
+Pretty good coding day. I've got it where I want it right now. I can make it
+more complicated later. But right now I need plain vanilla in time to make the
+presentation. 
