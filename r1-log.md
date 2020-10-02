@@ -1061,3 +1061,57 @@ problems with np.
 Pretty good coding day. I've got it where I want it right now. I can make it
 more complicated later. But right now I need plain vanilla in time to make the
 presentation. 
+
+
+From tutorial: 
+
+
+chart = ChartModule([{"Label": "Gini",
+                      "Color": "Black"}],
+                    data_collector_name='datacollector')
+                    Do for specialization and endowment
+
+server = ModularServer(MoneyModel,
+                       [grid, chart],
+                       "Money Model",
+                       {"N":100, "width":10, "height":10})
+
+
+### R1D39 - 2020-09-29
+Mostly worked through the Mesa Tutorial. I think I've got to think about ripping
+off the Schelling code as a basic framework to cram my model in. 
+
+### R1D40 - 2020-09-30
+Didn't do much, but I at least touched the project
+
+### R1D41 - 2020-10-01
+Not much time left. I've got to build in visualization and generate some results
+
+I just had the idea! How to make the exchange class more generalizable...
+
+Let's say we have an exchange between 3 agents. Each agent has to declare what
+it gives to each of the other two agents. Maybe it would be simpler if they also
+had a null vector of goods to "give" to themselves. 
+
+In any case, that can wait.
+
+Update: I've got the model running in the browser! It's not really doing
+anything yet, but I've got a switch and a couple sliders. The plots are there
+but not generating the appropriate output.
+
+I'd like the visualization of the agents to show something besides random
+movement. But more important is getting these plots to update with useful
+values. But first I'm going to have something to eat.
+
+Okay, I see what's wrong. The charts are pulling an agent level item, but I
+probably need to specify which agent. Bigger problem: running with and without
+trade for 30 rounds I've got higher utility without trade than with trade. 
+
+Okay, let's really go eat now.
+
+### R1D42 - 2020-10-02
+
+Decided to move my work into netlogo for now. It's just faster for ABM
+prototyping. And it's a lot of fun! Mostly that's just my own fluency, but
+still. I'll get some ideas sorted in NetLogo, get it spitting out results, then
+bring that back into the python version next week
