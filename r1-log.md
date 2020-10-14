@@ -1115,3 +1115,76 @@ Decided to move my work into netlogo for now. It's just faster for ABM
 prototyping. And it's a lot of fun! Mostly that's just my own fluency, but
 still. I'll get some ideas sorted in NetLogo, get it spitting out results, then
 bring that back into the python version next week
+
+### R1D43-44 - 2020-10-04
+
+Presented the model in NetLogo. I've got to get the utility stuff sorted out
+because it's been returning higher average scores with trade disallowed. Also,
+there are some things that aren't right, like the max_u production planning
+which implicitly assumes equal prices... although, statisitically speaking that
+is the expected value of the equilibrium prices. As N -> infinity, it would
+actually be the utility maximizing allocation.
+
+Though now that I think of it now, what I really want the turtles to be doing is
+trying to *get* a split of goods based on u_params, whether by production or
+purchase. So they need some expectation of their own production, and the net
+impact of their trading plan. So a turtle making a lot of good 0, but also
+selling a lot of good 0 needs to predict that they'll be able to use the
+proceeds to buy the appropriate amounts of the other goods.
+
+I've just put in some framework for turtles to have a set of strategies they run
+through a GA. I don't know exactly what they're going to look like, but it
+should involve setting expectations about what they'll make and what they'll
+buy/sell. I might want more than one learning function in each agent.
+
+I watched this video yesterday: https://www.youtube.com/watch?feature=youtu.be&v=MacVqujSXWE&app=desktop
+And I want to remember to revisit those ideas as I sort out GAs in my model.
+Also, I should look at the El Farol code a few more times.
+
+### R1D45 - 2020-10-05
+
+Have I considered dropping production? The POW camp economy had regular inputs,
+but essentially no real production. I could do something like that and have a
+variant of the model where 
+
+### R1D46 2020-10-13
+
+Lost a week. The code is a bit of a mess because I dropped lots of stuff in
+without getting it functional. Time for a refactor.
+
+Here's a thought... since the links are already holding on to trade histories
+and strength parameters, why not let them hold on to a default trade between two
+agents? I don't need to keep the whole history. I can just have it start with
+some sensible trade and have it update in the direction of comparative
+advantage. 
+
+What I really want the machine to learn is a mapping from any given internal
+state to the appropriate link to activate (to buy what they need or sell what
+they've got too much of, or whatever.)
+
+I've commented out most of the code (I'm keeping some of it, because some of it
+is good!). But I'm mostly building this thing back up from scratch. I'm thinking
+of the links as holding a vector of units (including direction of trade). Each
+trading round we'll choose between that and a mutation.
+
+As I'm working in NetLogo I'm simultaneously realizing how nice an IDE NetLogo
+is (as far as checking code, for sure), and how much I like vim keybindings that
+actually work. Rstudio's vim keybindings are more infuriating than just not
+using them. Maybe. They're crappy, anyways. I just want real vim in Rstudio. 
+
+Alright, it's been a bit of a scattered day, but I'm feeling good with the
+project in NetLogo. What I've got to do at this point is improve the production
+update functionality. Right now turtles change their production plans in the
+direction of the deal they just undertook. 
+
+I should also have them check to see if a trade is good for both agents.
+
+### R1D47 2020-10-14
+
+I have at least touched this project! I think i did fiddle with the learning
+rate a little earlier on. If it's too high, some turtles lose utility. 
+ 
+I'm also putting in a placeholder for solo updating. Turtles will have to update
+their production plans in the direction of what maximizes their utility.
+
+
