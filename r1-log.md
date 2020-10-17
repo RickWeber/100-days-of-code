@@ -1187,4 +1187,44 @@ rate a little earlier on. If it's too high, some turtles lose utility.
 I'm also putting in a placeholder for solo updating. Turtles will have to update
 their production plans in the direction of what maximizes their utility.
 
+Will reading this help me clarify my program?
+https://www.analyticsvidhya.com/blog/2017/01/introduction-to-reinforcement-learning-implementation/
 
+### R1D48 2020-10-15
+
+Okay, the solo_update procedure is sort of funny. I've got to figure out how to
+give an agent the chance to try on a strategy and only adopt it if they like the
+looks of it. 
+
+I've set that up to hatch copies of a turtle, mutate one of them, compare their
+utility, then compare their utility before killing them both. The original
+turtle updates its production plan if the mutant got more utility.
+
+Well, whatever I've done, it's broken the model. It works, but they're not
+moving towards comparative advantage.
+
+### R1D49 2020-10-17
+
+Touching the project.
+
+Okay, let's look through what I've got. 
+
+The go loop has turtles producing, trading, updating parameter values, consuming
+(eventually), checking to make sure production plans are all positive values,
+then recoloring links. Not bad. 
+
+I've got to check on the trade-update process, and the no-trade-update process. 
+
+Undertaking trades and producing look fine. 
+
+I might modify the mutation procedure so it only ever adds. That will mean less
+impact of mutations over time. I still also would like to try cross over and
+setting up a GA among the agents.
+
+Okay, let's do something concrete... I'm going to make a strictly positive
+mutation function.
+
+Alright, that was actually sort of easy.
+
+Now I've done a bit of organizing. That should make it easier to update the code
+in the future. It's still a bit of a mess, but it's less of a mess.
