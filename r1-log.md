@@ -1228,3 +1228,55 @@ Alright, that was actually sort of easy.
 
 Now I've done a bit of organizing. That should make it easier to update the code
 in the future. It's still a bit of a mess, but it's less of a mess.
+
+### R1D50 2020-10-18 
+ 
+ Poked around a bit today. It's sort of messy. I'll have to do some serious
+ refactoring this week.
+
+### R1D51 2020-10-22
+
+It's been hard to get to this at all. And I've got a headache. But I literally
+got rid of one typo, so I can't say I've done nothing today. Or this week.
+
+Also added a point mutation reporter
+
+### R1D52 2020-10-23
+
+Alright, let's poke around...
+
+The current version has trade data held in the links. Between any two turtles
+there's basically one possible trade, but it will update over time. I could do
+an in link and an out link, but that seems unnecessarily complicated.
+
+### R1D53-54 2020-10-23 and 24
+
+Didn't work on this project, but I did poke around an R problem:
+http://www.rosettacode.org/wiki/15_Puzzle_Game
+Implementing that in R.
+
+
+### R1D55 2020-10-28
+
+Oof, it's obviously mid semester because I'm missing a bunch of days. 
+
+Let's get into the model. It looks like I've been working on the trade
+procedure. It's pulling a default trade out of the link between two turtles. But
+I also want to check some random stuff. 
+
+Maybe I'll make a probabilistic mutation...
+
+Okay, I've got mutations happening with decreasing probability over time. And
+I've got a reporter that gives an agent's best option out of a set of possible
+trades.
+
+There's still a lot to sort out, but I'm moving forward!
+
+Current problem: sometimes the `undertake` procedure is getting an incomplete
+list. It must have something to do with the `cross_over_mutation` procedure
+
+
+### R1D56 2020-10-29
+
+I'm off track, but at least I'm coding. Did some register machine stuff this
+morning and some netlogo stuff this afternoon. Followed by more netlogo and more rodrego.
