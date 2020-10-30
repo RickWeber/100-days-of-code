@@ -1280,3 +1280,10 @@ list. It must have something to do with the `cross_over_mutation` procedure
 
 I'm off track, but at least I'm coding. Did some register machine stuff this
 morning and some netlogo stuff this afternoon. Followed by more netlogo and more rodrego.
+
+### R1D30 2020-10-30
+
+dang, we should get some halloween candy! 
+
+I didn't really do much coding, but I did help a student with R. So I'm counting
+that as a day. It's better than nothing.
