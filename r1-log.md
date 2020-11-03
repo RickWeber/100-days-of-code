@@ -1281,9 +1281,21 @@ list. It must have something to do with the `cross_over_mutation` procedure
 I'm off track, but at least I'm coding. Did some register machine stuff this
 morning and some netlogo stuff this afternoon. Followed by more netlogo and more rodrego.
 
-### R1D30 2020-10-30
+### R1D57 2020-10-30
 
 dang, we should get some halloween candy! 
 
 I didn't really do much coding, but I did help a student with R. So I'm counting
 that as a day. It's better than nothing.
+
+### R1D58 2020-11-03
+
+It's been a while! Let's see what's here... 
+
+Well, if I get nothing else done today, at least I got rid of a line of code
+that didn't do anything. 
+
+Also set it up so agents have limited connectivity and find_partner only returns
+links turtles. So that's good.
+
+Fixed a bug in my cross_over_mutation function!
