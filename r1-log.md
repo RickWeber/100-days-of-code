@@ -1299,3 +1299,23 @@ Also set it up so agents have limited connectivity and find_partner only returns
 links turtles. So that's good.
 
 Fixed a bug in my cross_over_mutation function!
+
+Big thing I'm missing: I'm not ensuring trades are mutually beneficial. 
+
+I've got reporters to generate random deals. And I can have agents evaluate
+those random deals. I'm trying to make a set of options then filter them down
+those that are beneficial for both partners. But it keeps spitting out trades
+that couldn't be mutually beneficial (e.g. trades where one agent gives a bunch
+of stuff to the other agent).
+
+Now that I think of it, I eliminated the direction of the links and I think that
+was a mistake. A deal should make sense one way, but direction shouldn't depend
+on which turtle initiates the trade. Each should initiate their own deal.
+
+Okay, I think I fixed the directionality. I still have the issue of choosing a
+set of mutually beneficial deals. And the more pressing problem of getting
+empty partners in the trading process. 
+
+### R1D59 2020-11-04
+Did an R day. Rvest is super cool for webscraping! I won't write too much here
+because when I get back I want to make sure I read yesterday's notes on the CA model.
