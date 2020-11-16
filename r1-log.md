@@ -1319,3 +1319,76 @@ empty partners in the trading process.
 ### R1D59 2020-11-04
 Did an R day. Rvest is super cool for webscraping! I won't write too much here
 because when I get back I want to make sure I read yesterday's notes on the CA model.
+
+### R1D60 2020-11-05
+What's going on now...
+
+I've got to make sure trades are mutually beneficial. And whatever is causing
+trades with nobody as a partner.
+
+I've at least touched the code though. 
+
+Even better, I'm building evaluate_deal to not depend on who is asking for the
+evaluation. But it's only going to work if there's a link. So evaluating
+possible deals is going to require some extra work.
+
+I'll look at it more closely tomorrow. This morning I put together an R script
+to pull data from the Predictit API. I've got to figure out how to get it
+running as a cronjob. Apparently it's not as straight forward as I'd expected.
+
+### R1D61 2020-11-06
+
+I think I sorted out the cronjob. Or maybe I haven't...
+
+### R1D62 2020-11-09
+
+It was a big R day. I spent the whole day prepping for class, then doing a class
+walking through a tutorial with `rvest` to scrape from Wikipedia.
+
+After class I spent some time poking at the code trying to make it faster. I
+don't think I was successful. But leaving it running for 4 hours got me a 45000
+page data set. 
+
+What are the most connected pages?
+
+Classical Hollywood Cinema (degree 3614)
+Catholic, Roman Catholic, Roman Catholic Church, and Catholics (all 3383)
+List of Statistical Topics, List of Statistics Articles, List of Statistics
+Topics (2806)
+Nitrous Oxide (2733)
+Metabolism (2717)
+New York City
+Russia
+Invited Address at the International Congress of Mathematicians
+List of LGBT related films
+Europe
+Italy
+List of University of Cambridge People
+David Hume
+
+### R1D63 2020-11-13
+
+Busy week! But I've at least touched the code!
+
+Looks like my last thing was to sort out evaluating if a trade is mutually beneficial.
+
+I put in some kind of crappy code that might could do the trick. And introduced
+some new errors. And I should really sort them out. But there would be too much
+to load into my brain and I'm not really ready to focus right now. But here's
+what I've got to figure out:
+
+1. A generic method to encapsulate a multi-agent exchange 
+2. A way to loop through the agents in such an exchange and ask each one of them
+   if the trade is at least better than no possibility of trade.
+   
+Beyond that I can build in some degree of strategery. But I also think it's a
+tad too complicated right now. This might be a good time to gut it entire and
+start again from scratch. 
+
+
+### R1D64 2020-11-15
+
+Did some R stuff. Working on an assignment for tomorrow. Playing around with
+tidygraph. But the dataset I'm working on is just enormous, so it's taking
+forever. I should use a restricted dataset, but it's in the middle of a bunch of
+calculations and I think I should just let it run overnight. 
