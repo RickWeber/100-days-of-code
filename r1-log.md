@@ -1392,3 +1392,32 @@ Did some R stuff. Working on an assignment for tomorrow. Playing around with
 tidygraph. But the dataset I'm working on is just enormous, so it's taking
 forever. I should use a restricted dataset, but it's in the middle of a bunch of
 calculations and I think I should just let it run overnight. 
+
+### R1D65 2020-11-16
+
+It failed! I didn't have the right libraries loaded and it decided not to fail
+until the very end. I'm also coming to realize that the random walk centrality
+measure takes forever to run.
+
+### R1D66 2020-11-17
+
+Just spent some time streaming my streamlining of the wikipedia code. It still
+takes a lot of time to run through. It's downloading thousands (millions) of
+pages and stripping them for links. I've got an iteration of it running that
+will go through 5 levels. Starting from graph theory, then anything linked to by
+that, anything linked to by those, etc. There are only 6 million articles, so I
+guess that's the limit. I wonder if I might accidentally get the whole link
+structure of English wikipedia? We'll see, I guess.
+
+### R1D67 2020-11-18
+
+Didn't get much done. Tweaked the R code which failed last night. It's been
+running for a few hours. Fingers crossed.
+
+### R1D68 2020-11-19
+
+A slow morning, but an important skill: error exceptions in R. Hopefully that's
+what's necessary to get my R wiki network data working properly. I looked at
+yesterday's progress and it gets a 404 error before giving me back nothing at
+all. So now it's going to try getting links and if it fails return an empty
+vector. It's running now, hopefully by tomorrow I'll have some results!
