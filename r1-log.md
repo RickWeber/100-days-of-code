@@ -1421,3 +1421,119 @@ what's necessary to get my R wiki network data working properly. I looked at
 yesterday's progress and it gets a 404 error before giving me back nothing at
 all. So now it's going to try getting links and if it fails return an empty
 vector. It's running now, hopefully by tomorrow I'll have some results!
+
+Alright, coming back to it in the afternoon I'm making some progress. I'm
+getting category data. It's going to take a ton of extra space. But whatever.
+It's fine for now. I've set it up to download a bunch, save a csv, and start
+randomly from one of the pages in the last bunch of data.
+
+One chunk of data I pulled has 113,243 links across 2,244 categories. Most
+popular category: "Articles with short description"
+
+### R1D69 2020-11-20
+
+I just can't put this wikipedia project down. I'm currently figuring out
+downloading the whole encyclopedia through dumps.wikipedia.org. There's plenty
+of interesting looking stuff including page views. I'm going to start with the
+links. It looks like I can get links and categories and have already set up an R
+filter to get them out of the latest data folder. 
+
+Jeez, just the categorylinks file is 2.9GB compressed. I'd better be careful not
+to crash my computer (more than necessary). 
+
+They downloaded. 6.6GB of pagelinks and 2.8GB of category links. Now I've got to
+figure out how to connect a database. Hopefully tidygraph works with dbplyr.
+
+### R1D70 2020-11-21
+
+Well, I'm unzipping these databases and so far the 2.9 GB file expanded to 21
+GB. So this is going to take a ton of memory. I wonder if I can access the
+compressed file without decompressing it? I guess that would have to hurt
+performance though.
+
+The pagelinks are about to pass 20 GB, still decompressing. That should go up to
+60ish, right? 
+
+Well, at least I learned a) the command to extract gzips (`gzip -l *.gz`), and
+b) how to run a command from R (`system2(cmd)`).
+
+Okay, it's *only* 49 GB! I'm following a stack overflow question and reading in
+the sql file as text and fixing some comment lines. 
+
+hmmm.... what I need to do is recover a mysql dump. That might be best done
+outside of R. And of course I've got some problem in my apt settings that's
+getting in the way. 
+
+Found this tool. if I'm lucky, this will take the text file that I've got, and
+put it into a database I can get into with DBI.
+https://github.com/dumblob/mysql2sqlite
+
+### R1D71 2020-11-23
+
+It's not code, but it's relevant: Today I'm learning about databases. I'm 80%
+sure I already knew that there were database programs optimized for reading
+("OLAP"/Analytical), and others optimized for writing ("OLTP"/transactional).
+But I'm noticing a weird shift in my attitude to databases. I remember a million
+years ago looking at a CS curriculum, seeing the section on databases and
+thinking "well that sounds boring". But now I know enough to realize that data
+storage is far from trivial. Maybe it's that at 33 I have acquired more
+information ("learned") than I can hold in my head at one time without
+assistance. Or at least it's more obvious than it was when I was 25 or 20 or
+whatever. 
+
+I keep bumping into my storage limits on dropbox and pcloud. And maintaining a
+backup of my computer is proving to be a bit of a pain. I'm contemplating
+setting up a NAS or something so I can just dump everything I've got into
+something and start again from scratch. I guess that was the idea with this
+external hard drive. But that's a distraction from a distraction, so let's get
+back to the useful one...
+
+I had zero idea of what database engines might be transactional vs analytical.
+It turns out most of the ones I've heard of are transactional. Including sqlite.
+So for this wikipedia project, it's possible that I need an analytical
+alternative to deal with the many GB of data. On the other hand, maybe searching
+through paths requires the transactional end of things? Well, if that's the
+case, sqlite will do the job. But if not, it looks like duckdb might be what I'm
+after. 
+
+On the other hand, the sql dump is from mysql. And I have to fix something to
+allow my computer to install/update properly. Maybe I'll do that this week...
+In any case, it does look like duckdb could be useful for other data projects.
+
+### R1D72 2020-12-02
+
+Okay, once this semester is done I've got to go through this journal and see
+what's been slipping through the cracks! I've been doing plenty of coding
+lately, but not keeping records. And I've fallen way behind on the comparative
+advantage model. But plenty of R as 390 winds down. Last night and this morning
+was doing some web scraping. Today I'm going to learn some R OOP by simulating
+(or at least starting to) Monopoly. 
+
+### R1D73 2020-12-08
+
+Another week! I've been doing R stuff pretty frequently, but I'm not counting
+that towards my 100 days because I didn't record it here. I guess I could go
+over git commit logs and figure out what I did when, but let's just call them
+free days. Right now I'm going through the homework for the first week of
+Statistical Rethinking (in R).
+
+### R1D74 2020-12-09
+
+Spent a bunch of time going through students' initial submissions for 390.
+They've got a week left and I hope they get something interesting. But for most
+of them I've been able to push them forward. 
+
+### R1D75 2020-12-14
+
+I've been doing a bit of R code. Today I've got to do some work on the
+Statistical Rethinking homework.
+
+### R1D76 2021-01-05
+
+Going to follow along with Robinson's Tidy Tuesday screen cast. Oh yeah, and at
+some point I've got to get back into that Stat Rethinking homework.
+
+I should also ask myself if I should start a new round for 100 days of code. Or
+do I want to keep track of my progress in some other way? Maybe just keeping it
+in my usual journal will make it easier for me to record little things. I should
+do that probably.
